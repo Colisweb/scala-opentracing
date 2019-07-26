@@ -42,8 +42,8 @@ object DDTracingContext {
   ): TracingContextResource[F] = {
     OpenTracingContext[F, DDTracer, DDSpan](
       tracer,
-      span => Sync[F].pure(new DDTracingContext[F](tracer, span, serviceName)),
-      parentSpan
+      parentSpan,
+      Some(span => Sync[F].pure(new DDTracingContext[F](tracer, span, serviceName))),
     )(
       operationName,
       tags + (SERVICE_NAME -> serviceName)

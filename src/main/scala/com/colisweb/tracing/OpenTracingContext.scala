@@ -6,18 +6,20 @@ import com.colisweb.tracing.TracingContext._
 import io.opentracing._
 
 /**
- * This is meant to be used with any OpenTracing compatible tracer.
- * For usage with Datadog APM, use DDTracingContext instead
- */
+  * This is meant to be used with any OpenTracing compatible tracer.
+  * For usage with Datadog APM, use DDTracingContext instead
+  */
 class OpenTracingContext[F[_]: Sync, T <: Tracer, S <: Span](
     tracer: T,
     span: S
 ) extends TracingContext[F] {
 
-  def childSpan(operationName: String, tags: Map[String, String] = Map.empty): TracingContextResource[F] =
+  def childSpan(
+      operationName: String,
+      tags: Map[String, String] = Map.empty
+  ): TracingContextResource[F] =
     OpenTracingContext[F, T, S](
       tracer,
-      s => Sync[F].pure(new OpenTracingContext[F, T, S](tracer, s)),
       Some(span)
     )(
       operationName,
@@ -39,8 +41,8 @@ object OpenTracingContext {
 
   def apply[F[_]: Sync, T <: Tracer, S <: Span](
       tracer: T,
-      liftSpanInContext: S => F[TracingContext[F]],
-      parentSpan: Option[S]
+      parentSpan: Option[S] = None,
+      liftSpanInContext: Option[S => F[TracingContext[F]]] = None,
   )(
       operationName: String,
       tags: Map[String, String] = Map.empty
@@ -58,8 +60,11 @@ object OpenTracingContext {
 
       for {
         span <- Sync[F].delay { spanBuilder.start().asInstanceOf[S] }
-        ctx  <- liftSpanInContext(span)
-        _    <- ctx.addTags(tags)
+        ctx <- liftSpanInContext match {
+          case Some(fn) => fn(span)
+          case None     => Sync[F].pure(new OpenTracingContext(tracer, span))
+        }
+        _ <- ctx.addTags(tags)
       } yield ctx
     }
 

@@ -38,6 +38,6 @@ abstract class TracingContext[F[_]: Sync] {
 object TracingContext {
   type TracingContextResource[F[_]] = Resource[F, TracingContext[F]]
   trait TracingContextBuilder[F[_]] {
-    def apply(operationName: String, tags: Map[String, String]): TracingContextResource[F]
+    def apply(operationName: String, tags: Map[String, String] = Map.empty): TracingContextResource[F]
   }
 }
