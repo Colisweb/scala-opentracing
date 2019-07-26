@@ -5,6 +5,10 @@ import cats.implicits._
 import com.colisweb.tracing.TracingContext._
 import io.opentracing._
 
+/**
+ * This is meant to be used with any OpenTracing compatible tracer.
+ * For usage with Datadog APM, use DDTracingContext instead
+ */
 class OpenTracingContext[F[_]: Sync, T <: Tracer, S <: Span](
     tracer: T,
     span: S

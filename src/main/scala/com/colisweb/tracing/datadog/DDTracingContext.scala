@@ -10,8 +10,10 @@ import datadog.trace.api.DDTags.SERVICE_NAME
 import io.opentracing.util.GlobalTracer
 
 /**
-  * This tracing context is intended to be used with Datadog and provides
-  * access to span id and trace id to correlate logs and traces together.
+  * This tracing context is intended to be used with Datadog APM.
+  * It adds the Service Name tag to all spans, required to see the traces in the APM
+  * view of Datadog.
+  * It also provides access to span id and trace id to correlate logs and traces together.
   */
 class DDTracingContext[F[_]: Sync](
     protected val tracer: DDTracer,

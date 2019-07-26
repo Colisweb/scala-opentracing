@@ -1,6 +1,6 @@
 package com.colisweb.tracing
 
-import cats.effect._
+import cats.effect.Sync
 import org.slf4j.{Logger, Marker}
 
 object TracingLogger {

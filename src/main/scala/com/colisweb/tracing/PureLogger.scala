@@ -1,6 +1,10 @@
 package com.colisweb.tracing
 import org.slf4j.Marker
 
+/**
+ * A logger that wraps the side-effect of logging into
+ * some algebraic effect F
+ */
 trait PureLogger[F[_]] {
   def trace(msg: String, args: Object*): F[Unit]
   def trace(marker: Marker, msg: String, args: Object*): F[Unit]
