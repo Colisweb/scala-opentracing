@@ -1,3 +1,5 @@
+![Scala Opentracing](./logo.png)
+
 # Scala Opentracing
 
 Scala Opentracing is a Scala  wrapper around the Opentracing library for Java, along with utilities to test Http4s applications. It was
