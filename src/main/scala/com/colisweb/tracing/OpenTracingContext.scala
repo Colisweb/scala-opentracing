@@ -26,10 +26,6 @@ class OpenTracingContext[F[_]: Sync, T <: Tracer, S <: Span](
       tags
     )
 
-  def close(): F[Unit] = Sync[F].delay {
-    span.finish()
-  }
-
   def addTags(tags: Map[String, String]): F[Unit] = Sync[F].delay {
     tags.foreach {
       case (key, value) => span.setTag(key, value)
@@ -41,14 +37,21 @@ object OpenTracingContext {
 
   def apply[F[_]: Sync, T <: Tracer, S <: Span](
       tracer: T,
-      parentSpan: Option[S] = None,
-      liftSpanInContext: Option[S => F[TracingContext[F]]] = None,
+      parentSpan: Option[S] = None
   )(
       operationName: String,
       tags: Map[String, String] = Map.empty
-  ): TracingContextResource[F] = {
+  ): TracingContextResource[F] =
+    spanResource(tracer, operationName, parentSpan)
+      .map(new OpenTracingContext(tracer, _))
+      .evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
 
-    val acquire: F[TracingContext[F]] = {
+  def spanResource[F[_]: Sync, T <: Tracer, S <: Span](
+      tracer: T,
+      operationName: String,
+      parentSpan: Option[S] = None
+  ): Resource[F, S] = {
+    val acquire: F[S] = {
       val spanBuilder = {
         val span = tracer.buildSpan(operationName)
         val spanWithParent = parentSpan match {
@@ -57,18 +60,10 @@ object OpenTracingContext {
         }
         spanWithParent
       }
-
-      for {
-        span <- Sync[F].delay { spanBuilder.start().asInstanceOf[S] }
-        ctx <- liftSpanInContext match {
-          case Some(fn) => fn(span)
-          case None     => Sync[F].pure(new OpenTracingContext(tracer, span))
-        }
-        _ <- ctx.addTags(tags)
-      } yield ctx
+      Sync[F].delay { spanBuilder.start().asInstanceOf[S] }
     }
 
-    def release(context: TracingContext[F]): F[Unit] = context.close()
+    def release(s: S): F[Unit] = Sync[F].delay(s.finish())
 
     Resource.make(acquire)(release)
   }

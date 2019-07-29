@@ -39,16 +39,11 @@ object DDTracingContext {
   def apply[F[_]: Sync](tracer: DDTracer, serviceName: String, parentSpan: Option[DDSpan] = None)(
       operationName: String,
       tags: Map[String, String] = Map.empty
-  ): TracingContextResource[F] = {
-    OpenTracingContext[F, DDTracer, DDSpan](
-      tracer,
-      parentSpan,
-      Some(span => Sync[F].pure(new DDTracingContext[F](tracer, span, serviceName))),
-    )(
-      operationName,
-      tags + (SERVICE_NAME -> serviceName)
-    )
-  }
+  ): TracingContextResource[F] =
+    OpenTracingContext
+      .spanResource(tracer, operationName, parentSpan)
+      .map(new DDTracingContext(tracer, _, serviceName))
+      .evalMap(ctx => ctx.addTags(tags + (SERVICE_NAME -> serviceName)).map(_ => ctx))
 
   private def buildAndRegisterDDTracer[F[_]: Sync] = Sync[F].delay {
     val tracer = new DDTracer()

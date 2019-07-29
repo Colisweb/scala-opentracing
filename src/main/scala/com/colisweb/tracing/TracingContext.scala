@@ -20,12 +20,6 @@ abstract class TracingContext[F[_]: Sync] {
    */
   def spanId: OptionT[F, String]  = OptionT.none
 
-  /**
-   * This allows to perform some side effect at the end of the computation. This shouldn't be
-   * called directly, but wrapped inside a `Resource` instead, that will close the context exactly once.
-   */
-  def close(): F[Unit]
-
   def addTags(tags: Map[String, String]): F[Unit]
 
   /**
