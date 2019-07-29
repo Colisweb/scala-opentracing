@@ -101,6 +101,7 @@ object MyRoutes {
         val result = tracingContext.childSpan("Some computation") wrap IO {
           // Something here ...
         }
+
         result.flatMap(Ok(_))
     }
 }
@@ -108,13 +109,63 @@ object MyRoutes {
 
 ## Correlating your logs
 
+If you want to link your traces and your logs together, you can do it manually by adding the `traceId` of the context
+to your messages.
+
+```scala
+val result: IO[Int] = tracingContextBuilder("Heavy mathematics", Map.empty) use { ctx =>
+  ctx.traceId.value flatMap { traceId =>
+    logger.debug("Doing stuff. Trace id : {}", traceId)
+  } *> IO {
+    // Some computation here
+  }
+} 
+```
+
 ### Automatic correlation for Datadog
+
+For people who use Datadog, we provide a wrapper around `Logger` from SLF4J that will automatically
+add the `spanId` and `traceId` to your logs. The logging side-effect is already wrapped in `F` for
+purity.
+
+```scala
+import org.http4s.dsl.io._
+import com.typesafe.scalalogging.StrictLogging
+import com.colisweb.tracing.http4s.TracedHttpRoutes
+import com.colisweb.tracing.http4s.TracedHttpRoutes._
+import com.colisweb.tracing.TracingContext.TracingContextBuilder
+import com.colisweb.binpacking.infrastructure.tracing.implicits._
+
+object MyRoutes extends StrictLogging {
+  // You will need an implicit Logger from slf4j to use the logging facility
+  implicit val slf4jLogger: org.slf4j.Logger = logger.underlying
+
+  def routes(implicit tracingContextBuilder: TracingContextBuilder[IO]): HttpRoutes[IO] =
+    TracedHttpRoutes[IO] {
+      case (req @ POST -> Root / "endpoint") using tracingContext =>
+        val result = tracingContext.childSpan("Some computation") use { ctx =>
+          ctx.logger.debug("Doing stuff") *> IO {
+            // Something here ...
+          }
+        } 
+
+        result.flatMap(Ok(_))
+    }
+}
+```
 
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-Make sure to follow our [Code of Conduct](./CODE_OF_CONDUCT.md)
+Make sure to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
+
+Here are some ideas of improvements :
+
+- Right now this library does not support distributed tracing, i.e the ability to continue a serialized
+trace from another application and/or send an unfinished trace to another application.
+- This library does not yet provide a TracingContext that just logs traces with their correlation id. This could
+be useful for people who don't use Opentracing but still want to measure and correlate operations.
 
 ## License
 
