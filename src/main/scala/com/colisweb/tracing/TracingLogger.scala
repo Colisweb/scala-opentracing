@@ -1,7 +1,9 @@
 package com.colisweb.tracing
 
+import cats.syntax.all._
 import cats.effect.Sync
 import org.slf4j.{Logger, Marker}
+import cats.data.OptionT
 
 object TracingLogger {
 
@@ -15,45 +17,27 @@ object TracingLogger {
   def pureTracingLogger[F[_]: Sync](
       logger: Logger,
       tracingContext: TracingContext[F],
-      markerFactory: TracingContext[F] => F[Marker]
-  ): PureLogger[F] = new PureLogger[F] {
-    def combineMarkers(a: Marker, b: Option[Marker]): Marker = b match {
-      case Some(m) => { a.add(m); a }
-      case _       => a
+      markerFactory: TracingContext[F] => Marker
+  ): PureLogger[F] = {
+    val pureLogger = PureLogger[F](logger)
+    def addCtxMarker(marker: Marker): Marker =
+      PureLogger.combineMarkers(Some(marker), Some(markerFactory(tracingContext))).get
+    new PureLogger[F] {
+      def trace(msg: String, args: Object*): F[Unit] = pureLogger.trace(msg, args: _*)
+      def trace(marker: Marker, msg: String, args: Object*): F[Unit] =
+        pureLogger.trace(addCtxMarker(marker), msg, args: _*)
+      def debug(msg: String, args: Object*): F[Unit] = pureLogger.debug(msg, args: _*)
+      def debug(marker: Marker, msg: String, args: Object*): F[Unit] =
+        pureLogger.info(addCtxMarker(marker), msg, args: _*)
+      def info(msg: String, args: Object*): F[Unit] = pureLogger.info(msg, args: _*)
+      def info(marker: Marker, msg: String, args: Object*): F[Unit] =
+        pureLogger.info(addCtxMarker(marker), msg, args: _*)
+      def warn(msg: String, args: Object*): F[Unit] = pureLogger.warn(msg, args: _*)
+      def warn(marker: Marker, msg: String, args: Object*): F[Unit] =
+        pureLogger.info(addCtxMarker(marker), msg, args: _*)
+      def error(msg: String, args: Object*): F[Unit] = pureLogger.error(msg, args: _*)
+      def error(marker: Marker, msg: String, args: Object*): F[Unit] =
+        pureLogger.info(addCtxMarker(marker), msg, args: _*)
     }
-
-    type LoggingFunction = (Option[Marker], String, Object*) => F[Unit]
-
-    def wrapSlf4j(
-        slf4jMethod: (Marker, String, Object*) => Unit
-    )(marker: Option[Marker], msg: String, args: Object*): F[Unit] = {
-      Sync[F].flatMap(markerFactory(tracingContext))(
-        m =>
-          Sync[F].delay {
-            slf4jMethod(combineMarkers(m, marker), msg, args: _*)
-          }
-      )
-    }
-
-    val trace: LoggingFunction                                     = wrapSlf4j(logger.trace)
-    def trace(marker: Marker, msg: String, args: Object*): F[Unit] = trace(Some(marker), msg, args: _*)
-    def trace(msg: String, args: Object*): F[Unit]                 = trace(None, msg, args: _*)
-
-    val debug: LoggingFunction                                     = wrapSlf4j(logger.debug)
-    def debug(marker: Marker, msg: String, args: Object*): F[Unit] = debug(Some(marker), msg, args: _*)
-    def debug(msg: String, args: Object*): F[Unit]                 = debug(None, msg, args: _*)
-
-    val info: LoggingFunction                                     = wrapSlf4j(logger.info)
-    def info(marker: Marker, msg: String, args: Object*): F[Unit] = info(Some(marker), msg, args: _*)
-    def info(msg: String, args: Object*): F[Unit]                 = info(None, msg, args: _*)
-
-    val warn: LoggingFunction                                     = wrapSlf4j(logger.warn)
-    def warn(marker: Marker, msg: String, args: Object*): F[Unit] = warn(Some(marker), msg, args: _*)
-    def warn(msg: String, args: Object*): F[Unit]                 = warn(None, msg, args: _*)
-
-    val error: LoggingFunction                                     = wrapSlf4j(logger.error)
-    def error(marker: Marker, msg: String, args: Object*): F[Unit] = error(Some(marker), msg, args: _*)
-    def error(msg: String, args: Object*): F[Unit]                 = error(None, msg, args: _*)
   }
-
 }
