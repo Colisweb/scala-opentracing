@@ -82,6 +82,30 @@ val result: IO[Int] = tracingContextBuilder("Parent context", Map.empty) wrap IO
 
 ## Tracing Http4s services
 
+This library provides `TracedHttpRoutes[F[_]]`, a function that works just like `HttpRoutes.of` from Http4s, except in wraps
+all requests in a tracing context, which you can retrieve in your routes to instrument subsequent computations.
+
+To create a `TracedHttpRoutes[F[_]]`, you will need an implicit `TracingContextBuilder[F[_]]` in scope. You can then retrieve the
+tracing context with the `using` extractor from `com.colisweb.tracing.TracedHttpRoutes._`
+
+```scala
+import org.http4s.dsl.io._
+import com.colisweb.tracing.http4s.TracedHttpRoutes
+import com.colisweb.tracing.http4s.TracedHttpRoutes._
+import com.colisweb.tracing.TracingContext.TracingContextBuilder
+
+object MyRoutes {
+  def routes(implicit tracingContextBuilder: TracingContextBuilder[IO]): HttpRoutes[IO] =
+    TracedHttpRoutes[IO] {
+      case (req @ POST -> Root / "endpoint") using tracingContext =>
+        val result = tracingContext.childSpan("Some computation") wrap IO {
+          // Something here ...
+        }
+        result.flatMap(Ok(_))
+    }
+}
+```
+
 ## Correlating your logs
 
 ### Automatic correlation for Datadog
