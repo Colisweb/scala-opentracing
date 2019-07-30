@@ -18,7 +18,17 @@ are automatically closed by a `Resource` from Cats effect for safety and conveni
 
 ## Installation
 
-// TODO
+Add our Bintray repository to your resolvers :
+
+```scala
+resolvers += Resolver.bintrayRepo("colisweb", "maven")
+```
+
+And add the library to your dependencies :
+
+```scala
+libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.0.1"
+```
 
 ## Usage
 
