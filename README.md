@@ -25,7 +25,7 @@ are automatically closed by a `Resource` from Cats effect for safety and conveni
 ## Creating a TracingContext explicitly
 
 A `TracingContext[F[_]]` represents some unit of works associated with a unique `spanId` and which can spawn child units of work. This library provides
-three instances of `TracingContext` so far: `OpenTracingContext`, `DDTracingContext` and `NoOpTracingContext` that does nothing in particular.
+four instances of `TracingContext` so far: `OpenTracingContext`, `DDTracingContext`, `LoggingTracingContext` and `NoOpTracingContext` that does nothing in particular.
 
 If you use Datadog, create a `DDTracingContext`, otherwise use `OpenTracingContext`. In both cases, you will need some `Tracer`, provided by whatever tracing
 library you use (Jaeger, Datadog ...).
@@ -39,6 +39,17 @@ import com.colisweb.tracing._
 val tracer: Tracer = ???
 val tracingContextBuilder = OpenTracingContext[IO, Tracer, Span](tracer) _
 ```
+
+### Logging all your traces for development
+
+For development or fast prototyping purposes, you can also use `LoggingTracingContext`, that will log all your operation to the standard
+output, along with the time every operation took, in milliseconds.
+
+```scala
+val tracingContextBuilder = LoggingTracingContext[IO]() _
+```
+
+To see the logs, make sur the `trace` level is enabled in SLF4J.
 
 Once you have a `TracingContextBuilder[F[_]]`, you can use to wrap your computations.
 
