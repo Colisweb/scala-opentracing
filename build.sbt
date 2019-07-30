@@ -5,12 +5,13 @@ lazy val scala211 = "2.11.12"
 lazy val supportedScalaVersions = List(scala212, scala211)
 
 ThisBuild / scalaVersion := scala212
-ThisBuild / version := "0.0.1"
+ThisBuild / version := "0.0.2"
 ThisBuild / organization := "com.colisweb"
 ThisBuild / organizationName := "colisweb"
 ThisBuild / bintrayOrganization := Some("colisweb") 
 ThisBuild / bintrayPackage := "scala-opentracing" 
 ThisBuild / licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+ThisBuild / parallelExecution := false
 
 lazy val root = (project in file("."))
   .settings(
