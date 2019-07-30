@@ -8,6 +8,7 @@ import com.colisweb.tracing.TracingContext._
 import datadog.opentracing._
 import datadog.trace.api.DDTags.SERVICE_NAME
 import io.opentracing.util.GlobalTracer
+import com.colisweb.tracing.TracingContext
 
 /**
   * This tracing context is intended to be used with Datadog APM.
@@ -19,7 +20,7 @@ class DDTracingContext[F[_]: Sync](
     protected val tracer: DDTracer,
     protected val span: DDSpan,
     protected val serviceName: String
-) extends OpenTracingContext[F, DDTracer, DDSpan](tracer, span) {
+) extends TracingContext[F] {
 
   override def traceId =
     OptionT.liftF(Sync[F] delay {
@@ -33,6 +34,12 @@ class DDTracingContext[F[_]: Sync](
 
   override def childSpan(operationName: String, tags: Map[String, String] = Map.empty) =
     DDTracingContext.apply[F](tracer, serviceName, Some(span))(operationName, tags)
+
+  def addTags(tags: Map[String, String]): F[Unit] = Sync[F].delay {
+    tags.foreach {
+      case (key, value) => span.setTag(key, value)
+    }
+  }
 }
 
 object DDTracingContext {
