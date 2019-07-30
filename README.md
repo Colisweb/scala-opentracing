@@ -42,8 +42,8 @@ val tracingContextBuilder = OpenTracingContext[IO, Tracer, Span](tracer) _
 
 ### Logging all your traces for development
 
-For development or fast prototyping purposes, you can also use `LoggingTracingContext`, that will log all your operation to the standard
-output, along with the time every operation took, in milliseconds.
+For development or fast prototyping purposes, you can also use `LoggingTracingContext`, that will log all your operations to the standard
+output, along with the time every operation took in milliseconds.
 
 ```scala
 val tracingContextBuilder = LoggingTracingContext[IO]() _
@@ -175,8 +175,8 @@ Here are some ideas of improvements :
 
 - Right now this library does not support distributed tracing, i.e the ability to continue a serialized
 trace from another application and/or send an unfinished trace to another application.
-- This library does not yet provide a TracingContext that just logs traces with their correlation id. This could
-be useful for people who don't use Opentracing but still want to measure and correlate operations.
+- The `LoggingTracingContext` does not support tags at the moment. Adding tags to a `LoggingTracingContext` will have
+no effect.
 
 ## License
 
