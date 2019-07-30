@@ -1,16 +1,12 @@
 package com.colisweb.tracing
 
-import scala.concurrent._
-import scala.concurrent.duration._
 import org.scalatest._
-import cats.implicits._
 import cats.data._
 import cats.effect._
-import java.io.ByteArrayOutputStream
 import java.util.UUID
 import com.typesafe.scalalogging.StrictLogging
 import com.colisweb.tracing.implicits._
-import java.io.PrintStream
+import TestUtils._
 
 class TracingLoggerSpec extends FunSpec with StrictLogging with Matchers {
 
@@ -48,19 +44,7 @@ class TracingLoggerSpec extends FunSpec with StrictLogging with Matchers {
     }
   }
 
-  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
-  private def testStdOut(
-      body: IO[Unit],
-      assertion: String => Assertion
-  ): Assertion = {
-    val out    = new ByteArrayOutputStream()
-    val stdOut = System.out
-    System.setOut(new PrintStream(out))
-    (body *> IO.sleep(10.millis)).unsafeRunSync()
-    System.setOut(stdOut)
-    assertion(out.toString)
-  }
 
   private def mockTracingContext(
       _spanId: OptionT[IO, String],

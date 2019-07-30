@@ -3,7 +3,6 @@ package com.colisweb.tracing.utils
 import cats.syntax.all._
 import cats.effect.Sync
 import org.slf4j.{Logger, Marker}
-import cats.data.OptionT
 import com.colisweb.tracing._
 
 object TracingLogger {

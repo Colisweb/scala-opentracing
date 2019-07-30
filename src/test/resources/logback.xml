@@ -4,7 +4,7 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
-    <logger name="com.colisweb" level="DEBUG" additivity="false">
+    <logger name="com.colisweb" level="trace">
         <appender-ref ref="STDOUT"/>
     </logger>
 
