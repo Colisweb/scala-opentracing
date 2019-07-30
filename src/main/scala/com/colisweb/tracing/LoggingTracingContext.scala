@@ -3,6 +3,7 @@ package com.colisweb.tracing
 import cats.effect._
 import cats.syntax.all._
 import com.colisweb.tracing.TracingContext._
+import com.colisweb.tracing.utils._
 import java.{util => ju}
 import cats.data.OptionT
 import scala.concurrent.duration.MILLISECONDS

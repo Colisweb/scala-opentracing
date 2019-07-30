@@ -4,6 +4,7 @@ import cats.effect._
 import cats.syntax.all._
 import net.logstash.logback.marker.Markers.appendEntries
 import org.slf4j.Logger
+import com.colisweb.tracing.utils._
 
 import scala.collection.JavaConverters.mapAsJavaMap
 

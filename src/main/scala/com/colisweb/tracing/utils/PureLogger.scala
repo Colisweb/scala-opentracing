@@ -1,4 +1,5 @@
-package com.colisweb.tracing
+package com.colisweb.tracing.utils
+
 import org.slf4j.Marker
 import cats.effect.Sync
 
@@ -20,11 +21,6 @@ trait PureLogger[F[_]] {
 }
 
 object PureLogger {
-  def combineMarkers(a: Option[Marker], b: Option[Marker]): Option[Marker] =
-    for {
-      firstMaker <- a
-      secondMarker <- b
-    } yield { firstMaker.add(secondMarker); firstMaker }
 
   type LoggingFunction[F[_]] = (Option[Marker], String, Object*) => F[Unit]
 
