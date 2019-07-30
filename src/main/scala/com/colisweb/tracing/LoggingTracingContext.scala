@@ -72,7 +72,7 @@ object LoggingTracingContext extends StrictLogging {
           end <- Clock[F].monotonic(MILLISECONDS)
           duration = end - start
           _ <- logger.trace(
-            "Trace {} Finished Span {} ({}) in {duration}ms",
+            "Trace {} Finished Span {} ({}) in {}ms",
             traceId,
             spanId,
             operationName,
