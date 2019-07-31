@@ -41,8 +41,6 @@ ThisBuild / releaseProcess := Seq[ReleaseStep](
   pushChanges
 )
 
-ThisBuild / releaseVersionBump := sbtrelease.Version.Bump.Minor
-
 // Compiler flags
 
 ThisBuild / scalacOptions ++= Seq(
