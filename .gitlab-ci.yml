@@ -27,4 +27,4 @@ test:
 release on bintray:
   stage: release
   script:
-    - sbt "set " "release skip-tests with-defaults"
+    - sbt "release skip-tests with-defaults"
