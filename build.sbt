@@ -6,7 +6,6 @@ lazy val scala211 = "2.11.12"
 lazy val supportedScalaVersions = List(scala212, scala211)
 
 ThisBuild / scalaVersion := scala212
-ThisBuild / version := "0.0.3"
 ThisBuild / organization := "com.colisweb"
 ThisBuild / organizationName := "colisweb"
 ThisBuild / bintrayOrganization := Some("colisweb") 
@@ -28,6 +27,8 @@ lazy val root = (project in file("."))
       )
   )
 
+// Release settings
+
 ThisBuild / releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,          
@@ -39,6 +40,10 @@ ThisBuild / releaseProcess := Seq[ReleaseStep](
   commitNextVersion,        
   pushChanges
 )
+
+ThisBuild / releaseVersionBump := sbtrelease.Version.Bump.Minor
+
+// Compiler flags
 
 ThisBuild / scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.

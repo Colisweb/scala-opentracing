@@ -1,7 +1,7 @@
 stages:
   - build
   - test
-  - deploy
+  - release
 
 compile scala sources:
   stage: build
@@ -23,3 +23,8 @@ test:
     - CI: true
   tags:
     - aws
+
+release on bintray:
+  stage: release
+  script:
+    - sbt "set " "release skip-tests with-defaults"
