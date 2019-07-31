@@ -1,5 +1,7 @@
 ![Scala Opentracing](./logo.png)
 
+[ ![Download](https://api.bintray.com/packages/colisweb/maven/scala-opentracing/images/download.svg) ](https://bintray.com/colisweb/maven/scala-opentracing/_latestVersion)
+
 # Scala Opentracing
 
 Scala Opentracing is a Scala  wrapper around the Opentracing library for Java, along with utilities to test Http4s applications. It was
@@ -27,7 +29,7 @@ resolvers += Resolver.bintrayRepo("otherUser", "maven")
 And add the library to your dependencies :
 
 ```scala
-libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.0.1"
+libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.0.2"
 ```
 
 ## Usage
