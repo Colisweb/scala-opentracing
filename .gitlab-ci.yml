@@ -1,0 +1,30 @@
+stages:
+  - build
+  - test
+  - release
+
+compile scala sources:
+  stage: build
+  script:
+  - rm -rf sbt-stash/
+  - sbt clean test:compile stash
+  artifacts:
+    paths:
+    - sbt-stash
+    expire_in: 2 hrs
+  tags:
+   - aws
+
+test:
+  stage: test
+  script:
+    - sbt clean test
+  variables:
+    - CI: true
+  tags:
+    - aws
+
+release on bintray:
+  stage: release
+  script:
+    - sbt "release skip-tests with-defaults"

@@ -1,11 +1,11 @@
 import Dependencies._
+import ReleaseTransformations._
 
 lazy val scala212 = "2.12.8"
 lazy val scala211 = "2.11.12"
 lazy val supportedScalaVersions = List(scala212, scala211)
 
 ThisBuild / scalaVersion := scala212
-ThisBuild / version := "0.0.2"
 ThisBuild / organization := "com.colisweb"
 ThisBuild / organizationName := "colisweb"
 ThisBuild / bintrayOrganization := Some("colisweb") 
@@ -26,6 +26,22 @@ lazy val root = (project in file("."))
         http4sDsl
       )
   )
+
+// Release settings
+
+ThisBuild / releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,          
+  setReleaseVersion,        
+  commitReleaseVersion,
+  tagRelease, 
+  releaseStepTask(publish),
+  setNextVersion,           
+  commitNextVersion,        
+  pushChanges
+)
+
+// Compiler flags
 
 ThisBuild / scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
