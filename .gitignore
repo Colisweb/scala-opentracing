@@ -2,3 +2,6 @@
 .metals
 target
 *.class
+.gitsecret/keys/random_seed
+!*.secret
+secrets-env.sh
