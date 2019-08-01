@@ -1,6 +1,7 @@
 package com.colisweb.tracing
 
 import cats.effect._
+import cats.data._
 import cats.syntax.all._
 import net.logstash.logback.marker.Markers.appendEntries
 import org.slf4j.Logger
@@ -10,20 +11,33 @@ import scala.collection.JavaConverters.mapAsJavaMap
 
 package object implicits {
 
-  /** Allows ignoring the value of a Resource.
-    * {{{
-    * import com.colisweb.tracing.implicits._
-    *
-    * someTracingContext.childContext("Child operation") wrap F.delay { /* Some computation */ }
-    * }}}
-    *
-    * is equivalent to
-    * {{{
-    * someTracingContext.childContext("Child operation") use { _ => F.delay { /* Some computation */ } }
-    * }}}
-    */
   implicit class ResourceOps[F[_]: Sync, A](resource: Resource[F, A]) {
-    def wrap[B](body: => F[B]) = resource.use(_ => body)
+
+    /** Allows ignoring the value of a Resource.
+      * {{{
+      * import com.colisweb.tracing.implicits._
+      *
+      * someTracingContext.childContext("Child operation") wrap F.delay { /* Some computation */ }
+      * }}}
+      *
+      * is equivalent to
+      * {{{
+      * someTracingContext.childContext("Child operation") use { _ => F.delay { /* Some computation */ } }
+      * }}}
+      */
+    def wrap[B](body: => F[B]): F[B] = resource.use(_ => body)
+
+    /** Allows allocating a Resource and supplying it to a function returning
+      * an EitherT.
+      */
+    def either[L, R](body: A => EitherT[F, L, R]): EitherT[F, L, R] =
+      EitherT(resource.use(a => body(a).value))
+
+    /** Allows allocating a Resource and supplying it to a function returning
+      * an OptionT.
+      */
+    def option[B](body: A => OptionT[F, B]): OptionT[F, B] =
+      OptionT(resource.use(a => body(a).value))
   }
 
   /**

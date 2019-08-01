@@ -103,6 +103,27 @@ val result: IO[Int] = tracingContextBuilder("Parent context", Map.empty) wrap IO
 }
 ```
 
+## Working with monad transformers (OptionT, EitherT)
+
+Sometimes, you will need to trace a computation and get back an `EitherT[F, Error, B]` or `OptionT[F, A]` instead
+of a regular `F[A]`. For convinience, this library also provides the `either` and `option` operations on `Resource[F, A]`.
+
+```scala
+import com.colisweb.implicits._
+
+val computation: Option[IO, Int] = ???
+
+val result: OptionT[IO, Int] = tracingContextBuilder("Parent context", Map.empty) option computation
+```
+
+```scala
+import com.colisweb.implicits._
+
+val computation: EitherT[IO, Throwable, Int] = ???
+
+val result: EitherT[IO, Throwable, Int] = tracingContextBuilder("Parent context", Map.empty) either computation
+```
+
 ## Tracing Http4s services
 
 This library provides `TracedHttpRoutes[F[_]]`, a function that works just like `HttpRoutes.of` from Http4s, except in wraps
