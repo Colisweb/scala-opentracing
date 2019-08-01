@@ -4,3 +4,4 @@ target
 *.class
 .gitsecret/keys/random_seed
 secrets-env.sh
+!*.secret

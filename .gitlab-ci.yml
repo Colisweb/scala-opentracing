@@ -12,8 +12,6 @@ compile scala sources:
     paths:
     - sbt-stash
     expire_in: 2 hrs
-  tags:
-   - aws
 
 test:
   stage: test
@@ -21,8 +19,6 @@ test:
     - sbt stashApply test
   variables:
     CI: "true"
-  tags:
-    - aws
 
 release on bintray:
   stage: release
@@ -34,5 +30,3 @@ release on bintray:
     - git secret reveal
     - source secrets-env.sh
     - sbt stashApply "release skip-tests with-defaults"
-  tags:
-    - aws
