@@ -17,7 +17,8 @@ release on bintray:
     refs:
       - master
   script:
-    - gpg --import  <(echo "$GITLAB_PGP_PRIVATE_KEY")
-    - git secret reveal
-    - source secrets-env.sh
     - sbt "release skip-tests with-defaults"
+
+before_script:
+  - gpg --import  <(echo "$GITLAB_PGP_PRIVATE_KEY")
+  - source <(gpg -q --decrypt secrets-env.sh.secret)
