@@ -23,7 +23,8 @@ lazy val root = (project in file("."))
         scalaTest % Test,
         cats,
         catsEffect,
-        http4sDsl
+        http4sDsl,
+        compilerPlugin(kindProjector)
       )
   )
 
@@ -33,6 +34,7 @@ lazy val tapir = (project in file("tapir"))
     bintrayPackage := "scala-opentracing-tapir",
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= Tapir.all ++ Seq(
+      compilerPlugin(kindProjector),
       scalaTest % Test
     )
   )
@@ -51,6 +53,8 @@ ThisBuild / releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   pushChanges
 )
+
+resolvers += Resolver.sonatypeRepo("releases")
 
 // Compiler flags
 

@@ -16,21 +16,27 @@ object TracedHttpRoutes {
   )(
       implicit builder: TracingContextBuilder[F]
   ): HttpRoutes[F] = {
-    // This could be avoided using the kind projector plugin
-    type KleisliF[A] = OptionT[F, A]
-    Kleisli[KleisliF, Request[F], Response[F]] { req =>
+    val tracedRoutes = Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
+      pf.andThen(OptionT.liftF(_)).applyOrElse(req, Function.const(OptionT.none))
+    }
+    wrapHttpRoutes(tracedRoutes, builder)
+  }
+
+  def wrapHttpRoutes[F[_]: Sync](
+      routes: Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]],
+      builder: TracingContextBuilder[F]
+  ): HttpRoutes[F] = {
+    Kleisli[OptionT[F, ?], Request[F], Response[F]] { req =>
       val operationName = "http4s-incoming-request"
       val tags = Map(
         HTTP_METHOD.getKey -> req.method.name,
-        HTTP_URL.getKey    -> req.uri.path.toString
+        HTTP_URL.getKey -> req.uri.path.toString
       )
 
       OptionT {
         builder(operationName, tags) use { context =>
           val tracedRequest = TracedRequest[F](req, context)
-          val responseOption: OptionT[F, Response[F]] =
-            pf.andThen(OptionT.liftF(_)).applyOrElse(tracedRequest, Function.const(OptionT.none))
-          val responseOptionWithTags = responseOption semiflatMap { response =>
+          val responseOptionWithTags = routes.run(tracedRequest) semiflatMap { response =>
             val tags = Map(
               HTTP_STATUS.getKey() -> response.status.code.toString
             ) ++

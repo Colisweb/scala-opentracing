@@ -1,7 +1,7 @@
 package com.colisweb.tracing.tapir
 
 import org.scalatest._
-import org.http4s.{Request, Uri}
+import org.http4s.Request
 import tapir._
 import com.colisweb.tracing._
 import cats.effect._
@@ -16,9 +16,8 @@ class TapirSpec extends AsyncFunSpec with Matchers {
     it("Should create a tracing context and pass it to the logic function") {
       (for {
         tracingContextDeferred <- Deferred[IO, TracingContext[IO]]
-        _ <- myEndpoint
-          .toTracedRoutes[IO](
-            (_, ctx) => tracingContextDeferred.complete(ctx) *> IO.pure(Right("Ok"))
+        _ <- myEndpoint.toTracedRoute[IO](
+            (_, ctx: TracingContext[IO]) => tracingContextDeferred.complete(ctx) *> IO.pure(Right("Ok"))
           )
           .run(request)
           .value
@@ -31,8 +30,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
 
     it("Should serve a the correct response when the endpoint is called with a valid request") {
       val output = java.util.UUID.randomUUID().toString
-      myEndpoint
-        .toTracedRoute[IO](
+      myEndpoint.toTracedRoute[IO](
           (_, _) => IO.pure(Right(output))
         )
         .run(request)
@@ -43,22 +41,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
         .unsafeToFuture()
     }
 
-    it("Should serve a 404 when the endpoint is called with on wrong path") {
-      myEndpoint
-        .toTracedRoute[IO](
-          (_, _) => IO.pure(Right("Ok"))
-        )
-        .run(request.withUri(Uri.unsafeFromString("/toto")))
-        .value
-        .map(_.get)
-        .map(res => {
-          res.status.code shouldBe 404
-        })
-        .unsafeToFuture()
-    }
-
     it("Should serve an error when an exception is thrown from the endpoint logic") {
-
       val endpointWithError = myEndpoint.errorOut(plainBody[EndpointError](endpointErrorCodec))
       endpointWithError
         .toTracedRouteRecoverErrors[IO](
@@ -75,7 +58,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
 
   case class EndpointError(message: String) extends RuntimeException
 
-  implicit def endpointErrorCodec =
+  implicit def endpointErrorCodec: CodecForOptional[EndpointError, MediaType.TextPlain, String] =
     CodecForOptional.fromCodec(
       Codec.stringPlainCodecUtf8.mapDecode(str => DecodeResult.Value(EndpointError(str)))(
         err => s"Message: ${err.message}"

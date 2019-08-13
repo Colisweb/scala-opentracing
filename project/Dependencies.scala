@@ -5,6 +5,7 @@ object Dependencies {
   val cats = "org.typelevel" %% "cats-core" % "1.4.0"
   val catsEffect = "org.typelevel" %% "cats-effect" % "1.3.0"
   val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.0"
+  val kindProjector = "org.typelevel" %% "kind-projector" % "0.10.3"
 
   object OpenTracing {
     val version = "0.31.0"
