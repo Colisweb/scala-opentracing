@@ -161,7 +161,7 @@ The package `scala-opentracing-tapir` provides a small integration layer that al
 to create traced http endpoints from tapir `Endpoint` definitions.
 
 ```
-libraryDependencies += "com.colisweb" %% "scala-opentracing-tapir" % "0.0.5"
+libraryDependencies += "com.colisweb" %% "scala-opentracing-tapir-integration" % "0.0.5"
 ```
 
 ```scala
