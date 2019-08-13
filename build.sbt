@@ -8,14 +8,14 @@ lazy val supportedScalaVersions = List(scala212, scala211)
 ThisBuild / scalaVersion := scala212
 ThisBuild / organization := "com.colisweb"
 ThisBuild / organizationName := "colisweb"
-ThisBuild / bintrayOrganization := Some("colisweb") 
-ThisBuild / bintrayPackage := "scala-opentracing" 
+ThisBuild / bintrayOrganization := Some("colisweb")
 ThisBuild / licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 ThisBuild / parallelExecution := false
 
 lazy val root = (project in file("."))
   .settings(
     name := "Scala Opentracing",
+    bintrayPackage := "scala-opentracing",
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= OpenTracing.all
       ++ Log.all
@@ -27,17 +27,28 @@ lazy val root = (project in file("."))
       )
   )
 
+lazy val tapir = (project in file("tapir"))
+  .settings(
+    name := "Scala Opentracing Tapir Integration",
+    bintrayPackage := "scala-opentracing-tapir",
+    crossScalaVersions := supportedScalaVersions,
+    libraryDependencies ++= Tapir.all ++ Seq(
+      scalaTest % Test
+    )
+  )
+  .dependsOn(root)
+
 // Release settings
 
 ThisBuild / releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
-  inquireVersions,          
-  setReleaseVersion,        
+  inquireVersions,
+  setReleaseVersion,
   commitReleaseVersion,
-  tagRelease, 
+  tagRelease,
   releaseStepTask(publish),
-  setNextVersion,           
-  commitNextVersion,        
+  setNextVersion,
+  commitNextVersion,
   pushChanges
 )
 
