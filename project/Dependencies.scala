@@ -14,6 +14,13 @@ object Dependencies {
     val all = Seq(api, util, dd)
   }
 
+  object Tapir {
+    final val version = "0.9.1"
+    final val core = "com.softwaremill.tapir" %% "tapir-core" % version
+    final val http4sServer = "com.softwaremill.tapir" %% "tapir-http4s-server" % version
+    final val all = Seq(core, http4sServer)
+  }
+
   object Log {
     val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
     val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"

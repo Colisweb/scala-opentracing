@@ -29,7 +29,7 @@ resolvers += Resolver.bintrayRepo("colisweb", "maven")
 And add the library to your dependencies :
 
 ```scala
-libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.0.2"
+libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.0.5"
 ```
 
 ## Usage
@@ -150,6 +150,41 @@ object MyRoutes {
     }
 }
 ```
+
+### Using Tapir
+
+[tapir](https://github.com/softwaremill/tapir), or *Typed API descRiptions* is a fantastic library
+that allows you to define http endpoints using Scala's type system, and separate those definitions
+from your actual business logic. Tapir definitions can be *interpreted* into http4s `HttpRoutes`.
+
+The package `scala-opentracing-tapir` provides a small integration layer that allows you
+to create traced http endpoints from tapir `Endpoint` definitions.
+
+```
+libraryDependencies += "com.colisweb" %% "scala-opentracing-tapir" % "0.0.5"
+```
+
+```scala
+import cats.effect.IO
+import tapir._
+import com.colisweb.tracing.tapir._
+
+val myEndpoint: Endpoint[Unit, Unit, String, Nothing] =
+  endpoint.get.in("/hello").out(stringBody)
+
+val routes: HttpRoutes[IO] = myEndpoint.toTracedRoute[IO](
+  (input, ctx) => ctx.childSpan("Some description") use { _ =>
+    IO.pure(Right("OK"))
+  }
+)
+```
+
+You will need an implicit `ContextShift[F]` in scope for this to work. Take a look
+at the [tests](./tapir/src/test/scala/com/colisweb/tracing/tapir/TapirSpec.scala) for 
+further examples.
+
+If your error type extends `Throwable`, you can also use `toTracedRouteRecoverErrors`, a traced
+equivalent of `toTracedRoute` from `tapir-http4s-server`.
 
 ## Correlating your logs
 
