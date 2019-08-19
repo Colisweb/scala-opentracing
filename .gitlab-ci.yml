@@ -16,11 +16,11 @@ release on bintray:
   only:
     refs:
       - master
+      - 
   script:
-    - sbt "release skip-tests with-defaults"
-    - sbt tapir/publish
+    - sbt -Dbintray.user=gitlab-ci -Dbintray.pass=$BINTRAY_PASS "release skip-tests with-defaults"
     - git rebase master develop
-    - git push origin develop --force-wuth-lease
+    - git push origin develop --force-with-lease
 
 before_script:
   - gpg --import  <(echo "$GITLAB_PGP_PRIVATE_KEY")
