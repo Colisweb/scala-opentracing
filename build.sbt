@@ -13,6 +13,9 @@ ThisBuild / licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 ThisBuild / parallelExecution := false
 
 lazy val root = (project in file("."))
+  .aggregate(core, tapir)
+
+lazy val core = (project in file("core"))
   .settings(
     name := "Scala Opentracing",
     bintrayPackage := "scala-opentracing",
@@ -38,7 +41,7 @@ lazy val tapir = (project in file("tapir"))
       scalaTest % Test
     )
   )
-  .dependsOn(root)
+  .dependsOn(core)
 
 // Release settings
 

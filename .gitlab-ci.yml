@@ -18,7 +18,6 @@ release on bintray:
       - master
   script:
     - sbt -Dbintray.user=gitlab-ci -Dbintray.pass=$BINTRAY_PASS "release skip-tests with-defaults"
-    - sbt -Dbintray.user=gitlab-ci -Dbintray.pass=$BINTRAY_PASS tapir/publish
     - git rebase master develop
     - git push origin develop --force-with-lease
 
