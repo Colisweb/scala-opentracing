@@ -18,6 +18,8 @@ release on bintray:
       - master
   script:
     - sbt "release skip-tests with-defaults"
+    - git rebase master develop
+    - git push origin develop --force-wuth-lease
 
 before_script:
   - gpg --import  <(echo "$GITLAB_PGP_PRIVATE_KEY")
