@@ -16,10 +16,14 @@ release on bintray:
   only:
     refs:
       - master
+      - refacto/release-process
   script:
-    - sbt "release skip-tests with-defaults"
-    - git rebase master develop
-    - git push origin develop --force-wuth-lease
+    - git config --global user.email $GITLAB_USER_EMAIL
+    - git config --global user.name "$GITLAB_USER_NAME"
+    - git checkout $CI_COMMIT_REF_NAME 
+    - sbt -Dbintray.user=gitlab-ci -Dbintray.pass=$BINTRAY_PASS "release skip-tests with-defaults"
+    - git rebase $CI_COMMIT_REF_NAME develop
+    - git push origin develop --force-with-lease
 
 before_script:
   - gpg --import  <(echo "$GITLAB_PGP_PRIVATE_KEY")
