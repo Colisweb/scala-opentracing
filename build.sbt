@@ -13,6 +13,9 @@ ThisBuild / licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 ThisBuild / parallelExecution := false
 
 lazy val root = (project in file("."))
+  .settings(
+    skip in publish := true
+  )
   .aggregate(core, tapir)
 
 lazy val core = (project in file("core"))
