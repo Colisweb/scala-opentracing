@@ -29,7 +29,7 @@ resolvers += Resolver.bintrayRepo("colisweb", "maven")
 And add the library to your dependencies :
 
 ```scala
-libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.0.5"
+libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.0.7"
 ```
 
 ## Usage
@@ -39,7 +39,7 @@ libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.0.5"
 A `TracingContext[F[_]]` represents some unit of works associated with a unique `spanId` and which can spawn child units of work. This library provides
 four instances of `TracingContext` so far: `OpenTracingContext`, `DDTracingContext`, `LoggingTracingContext` and `NoOpTracingContext` that does nothing in particular.
 
-If you use Datadog, create a `DDTracingContext`, otherwise use `OpenTracingContext`. In both cases, you will need some `Tracer`, provided by whatever tracing
+If you use Datadog, create a `DDTracingContext`, otherwise use `OpenTracingContext`. Both will rely on some `Tracer`, provided by whatever tracing
 library you use (Jaeger, Datadog ...).
 
 In examples, we'll use `IO` from Cats effect as our `F` but you can use any monad that satisfies the `Sync` Typeclass, like `Task` from Monix.
@@ -51,6 +51,19 @@ import com.colisweb.tracing._
 val tracer: Tracer = ???
 val tracingContextBuilder = OpenTracingContext[IO, Tracer, Span](tracer) _
 ```
+### Creating a TracingContext for Datadog
+
+Datadog requires that you create a tracer and then register it as the "Global tracer" for your application. For convenience and purity, this library
+includes a utility method that will create and register the tracer for you, and return an `F[TracingContextBuilder[F]]`.
+
+```scala
+import com.colisweb.tracing.datadog._
+
+val tracingContextBuilderIO: IO[TracingContextBuilder[IO]] = DDTracingContext.getDDTracingContextBuilder[IO]("your-service-name")
+```
+
+Don't evaluate this effect multiple times, as it will recreate a new tracer every time. Instead, use it in the *main* of your application, and propagate
+the `TracingContextBuilder` down where you need it.
 
 ### Logging all your traces for development
 
