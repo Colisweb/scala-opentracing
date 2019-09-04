@@ -10,6 +10,7 @@ test:
     - sbt clean test
   variables:
     CI: "true"
+    GIT_STRATEGY: clone
 
 release on bintray:
   stage: release
@@ -17,9 +18,14 @@ release on bintray:
     refs:
       - master
   script:
+    - git config --global user.email $GITLAB_USER_EMAIL
+    - git config --global user.name "$GITLAB_USER_NAME"
+    - git fetch
+    - git checkout develop
+    - git checkout $CI_COMMIT_REF_NAME 
+    - git remote set-url origin https://gitlab.ci1:$GIT_CI_PASS@gitlab.com/$CI_PROJECT_PATH.git
     - sbt -Dbintray.user=gitlab-ci -Dbintray.pass=$BINTRAY_PASS "release skip-tests with-defaults"
-    - sbt -Dbintray.user=gitlab-ci -Dbintray.pass=$BINTRAY_PASS tapir/publish
-    - git rebase master develop
+    - git rebase $CI_COMMIT_REF_NAME develop
     - git push origin develop --force-with-lease
 
 before_script:

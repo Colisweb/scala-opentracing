@@ -14,6 +14,12 @@ ThisBuild / parallelExecution := false
 
 lazy val root = (project in file("."))
   .settings(
+    skip in publish := true
+  )
+  .aggregate(core, tapir)
+
+lazy val core = (project in file("core"))
+  .settings(
     name := "Scala Opentracing",
     bintrayPackage := "scala-opentracing",
     crossScalaVersions := supportedScalaVersions,
@@ -38,7 +44,7 @@ lazy val tapir = (project in file("tapir"))
       scalaTest % Test
     )
   )
-  .dependsOn(root)
+  .dependsOn(core)
 
 // Release settings
 
