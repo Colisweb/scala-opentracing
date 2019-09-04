@@ -17,7 +17,6 @@ release on bintray:
   only:
     refs:
       - master
-      - 
   script:
     - git config --global user.email $GITLAB_USER_EMAIL
     - git config --global user.name "$GITLAB_USER_NAME"

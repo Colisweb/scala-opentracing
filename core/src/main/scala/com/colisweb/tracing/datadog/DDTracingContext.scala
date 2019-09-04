@@ -9,6 +9,7 @@ import datadog.opentracing._
 import datadog.trace.api.DDTags.SERVICE_NAME
 import io.opentracing.util.GlobalTracer
 import com.colisweb.tracing.TracingContext
+import com.typesafe.scalalogging.StrictLogging
 
 /**
   * This tracing context is intended to be used with Datadog APM.
@@ -42,7 +43,7 @@ class DDTracingContext[F[_]: Sync](
   }
 }
 
-object DDTracingContext {
+object DDTracingContext extends StrictLogging {
   def apply[F[_]: Sync](tracer: DDTracer, serviceName: String, parentSpan: Option[DDSpan] = None)(
       operationName: String,
       tags: Map[String, String] = Map.empty
@@ -54,7 +55,11 @@ object DDTracingContext {
 
   private def buildAndRegisterDDTracer[F[_]: Sync] = Sync[F].delay {
     val tracer = new DDTracer()
-    GlobalTracer.register(tracer)
+    if (GlobalTracer.isRegistered()) {
+      logger.debug(s"Opentracing GlobalTracer is already registered. Skipping registration.")
+    } else {
+      GlobalTracer.register(tracer)
+    }
     datadog.trace.api.GlobalTracer.registerIfAbsent(tracer)
     tracer
   }
