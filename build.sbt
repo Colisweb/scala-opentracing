@@ -47,7 +47,7 @@ lazy val tapir = (project in file("tapir"))
   .dependsOn(core)
 
 // Release settings
-
+ThisBuild / releaseCommitMessage := s"[ci skip] Setting version to ${(version in ThisBuild).value}"
 ThisBuild / releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,

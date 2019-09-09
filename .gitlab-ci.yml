@@ -20,13 +20,13 @@ release on bintray:
   script:
     - git config --global user.email $GITLAB_USER_EMAIL
     - git config --global user.name "$GITLAB_USER_NAME"
-    - git fetch
-    - git checkout develop
-    - git checkout $CI_COMMIT_REF_NAME 
     - git remote set-url origin https://gitlab.ci1:$GIT_CI_PASS@gitlab.com/$CI_PROJECT_PATH.git
+    - git fetch origin
+    - git checkout $CI_COMMIT_REF_NAME 
     - sbt -Dbintray.user=gitlab-ci -Dbintray.pass=$BINTRAY_PASS "release skip-tests with-defaults"
-    - git rebase $CI_COMMIT_REF_NAME develop
-    - git push origin develop --force-with-lease
+    - git checkoout develop
+    - git merge $CI_COMMIT_REF_NAME --ff-only
+    - git push origin develop --force
 
 before_script:
   - gpg --import  <(echo "$GITLAB_PGP_PRIVATE_KEY")
