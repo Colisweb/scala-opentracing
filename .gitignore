@@ -1,5 +1,7 @@
 .bloop
 .metals
+.idea
+.vscode
 target
 *.class
 .gitsecret/keys/random_seed

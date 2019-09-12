@@ -8,7 +8,6 @@ import cats.effect._
 import cats.effect.concurrent.Deferred
 import cats.data.OptionT
 import cats.implicits._
-import com.colisweb.tracing.TracingContext.TracingContextBuilder
 import scala.concurrent.ExecutionContext
 
 class TapirSpec extends AsyncFunSpec with Matchers {
@@ -76,11 +75,11 @@ class TapirSpec extends AsyncFunSpec with Matchers {
   val mockedContext: TracingContext[IO] = new TracingContext[IO] {
     override def spanId: OptionT[IO, String] = OptionT.pure(randomSpanId)
     override def traceId: OptionT[IO, String] = OptionT.pure(randomSpanId)
-    def addTags(tags: Map[String, String]): cats.effect.IO[Unit] = IO.unit
+    def addTags(tags: Tags): cats.effect.IO[Unit] = IO.unit
     def childSpan(
         operationName: String,
-        tags: Map[String, String]
-    ): com.colisweb.tracing.TracingContext.TracingContextResource[cats.effect.IO] = ???
+        tags: Tags
+    ): TracingContextResource[cats.effect.IO] = ???
   }
 
   implicit def mockedContextBuilder: TracingContextBuilder[IO] =

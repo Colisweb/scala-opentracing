@@ -3,8 +3,7 @@ package com.colisweb.tracing.http4s
 import cats.data._
 import cats.effect._
 import cats.implicits._
-import com.colisweb.tracing.TracingContext
-import com.colisweb.tracing.TracingContext._
+import com.colisweb.tracing._
 import io.opentracing._
 import io.opentracing.tag.Tags._
 import org.http4s._

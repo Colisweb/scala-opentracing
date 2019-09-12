@@ -4,8 +4,8 @@
 
 # Scala Opentracing
 
-Scala Opentracing is a Scala  wrapper around the Opentracing library for Java, along with utilities to test Http4s applications. It was
-developed specifically to address our needs for Datadog APM instrumentation at Colisweb.
+Scala Opentracing is a Scala wrapper around the Opentracing library for Java, along with utilities to monitor Http4s applications. It was originally
+developed to address our needs for Datadog APM instrumentation at Colisweb.
 
 It is being used in production at Colisweb.
 
@@ -29,14 +29,14 @@ resolvers += Resolver.bintrayRepo("colisweb", "maven")
 And add the library to your dependencies :
 
 ```scala
-libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.0.6"
+libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.1.0"
 ```
 
 ## Usage
 
 ## Creating a TracingContext explicitly
 
-A `TracingContext[F[_]]` represents some unit of works associated with a unique `spanId` and which can spawn child units of work. This library provides
+A `TracingContext[F[_]]` represents some unit of work, associated with a unique `spanId`, and which can spawn child units of work. This library provides
 four instances of `TracingContext` so far: `OpenTracingContext`, `DDTracingContext`, `LoggingTracingContext` and `NoOpTracingContext` that does nothing in particular.
 
 If you use Datadog, create a `DDTracingContext`, otherwise use `OpenTracingContext`. Both will rely on some `Tracer`, provided by whatever tracing
@@ -79,7 +79,7 @@ To see the logs, make sur the `trace` level is enabled in SLF4J.
 Once you have a `TracingContextBuilder[F[_]]`, you can use to wrap your computations.
 
 ```scala
-// You can pass tags as a Map[String, String]
+// You can pass tags as a Tags
 val result: IO[Int] = tracingContextBuilder("Heavy mathematics", Map.empty) use { _ =>
   IO { 42 - 5 }
 }
@@ -122,7 +122,7 @@ Sometimes, you will need to trace a computation and get back an `EitherT[F, Erro
 of a regular `F[A]`. For convinience, this library also provides the `either` and `option` operations on `Resource[F, A]`.
 
 ```scala
-import com.colisweb.implicits._
+import com.colisweb.tracing.implicits._
 
 val computation: Option[IO, Int] = ???
 
@@ -130,7 +130,7 @@ val result: OptionT[IO, Int] = tracingContextBuilder("Parent context", Map.empty
 ```
 
 ```scala
-import com.colisweb.implicits._
+import com.colisweb.tracing.implicits._
 
 val computation: EitherT[IO, Throwable, Int] = ???
 
@@ -149,7 +149,7 @@ tracing context with the `using` extractor from `com.colisweb.tracing.TracedHttp
 import org.http4s.dsl.io._
 import com.colisweb.tracing.http4s.TracedHttpRoutes
 import com.colisweb.tracing.http4s.TracedHttpRoutes._
-import com.colisweb.tracing.TracingContext.TracingContextBuilder
+import com.colisweb.tracing.TracingContextBuilder
 
 object MyRoutes {
   def routes(implicit tracingContextBuilder: TracingContextBuilder[IO]): HttpRoutes[IO] =
@@ -174,7 +174,7 @@ The package `scala-opentracing-tapir` provides a small integration layer that al
 to create traced http endpoints from tapir `Endpoint` definitions.
 
 ```
-libraryDependencies += "com.colisweb" %% "scala-opentracing-tapir-integration" % "0.0.5"
+libraryDependencies += "com.colisweb" %% "scala-opentracing-tapir-integration" % "0.1.0"
 ```
 
 ```scala
@@ -225,8 +225,7 @@ import org.http4s.dsl.io._
 import com.typesafe.scalalogging.StrictLogging
 import com.colisweb.tracing.http4s.TracedHttpRoutes
 import com.colisweb.tracing.http4s.TracedHttpRoutes._
-import com.colisweb.tracing.TracingContext.TracingContextBuilder
-import com.colisweb.binpacking.infrastructure.tracing.implicits._
+import com.colisweb.tracing._
 
 object MyRoutes extends StrictLogging {
   // You will need an implicit Logger from slf4j to use the logging facility
