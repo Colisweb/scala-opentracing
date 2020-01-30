@@ -16,9 +16,9 @@ object Dependencies {
   }
 
   object Tapir {
-    final val version = "0.9.1"
-    final val core = "com.softwaremill.tapir" %% "tapir-core" % version
-    final val http4sServer = "com.softwaremill.tapir" %% "tapir-http4s-server" % version
+    final val version = "0.12.18"
+    final val core = "com.softwaremill.sttp.tapir" %% "tapir-core" % version
+    final val http4sServer = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % version
     final val all = Seq(core, http4sServer)
   }
 

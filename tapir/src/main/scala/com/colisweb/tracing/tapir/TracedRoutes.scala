@@ -1,7 +1,7 @@
 package com.colisweb.tracing.tapir
 
-import _root_.tapir._
-import _root_.tapir.server.http4s._
+import _root_.sttp.tapir._
+import _root_.sttp.tapir.server.http4s._
 import cats.effect._
 import cats.data._
 import com.colisweb.tracing.http4s._
@@ -44,12 +44,13 @@ trait TracedRoutes {
       TracedHttpRoutes.wrapHttpRoutes(
         Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
           e.toRouteRecoverErrors(input => logic(input, req.tracingContext))(
-            serverOptions,
-            implicitly,
-            implicitly,
-            implicitly,
-            implicitly
-          ).run(req.request)
+              serverOptions,
+              implicitly,
+              implicitly,
+              implicitly,
+              implicitly
+            )
+            .run(req.request)
         },
         builder
       )

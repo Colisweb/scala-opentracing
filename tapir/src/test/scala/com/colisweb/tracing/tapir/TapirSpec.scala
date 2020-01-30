@@ -2,12 +2,13 @@ package com.colisweb.tracing.tapir
 
 import org.scalatest._
 import org.http4s.Request
-import tapir._
+import sttp.tapir._
 import com.colisweb.tracing._
 import cats.effect._
 import cats.effect.concurrent.Deferred
 import cats.data.OptionT
 import cats.implicits._
+
 import scala.concurrent.ExecutionContext
 
 class TapirSpec extends AsyncFunSpec with Matchers {
@@ -15,8 +16,10 @@ class TapirSpec extends AsyncFunSpec with Matchers {
     it("Should create a tracing context and pass it to the logic function") {
       (for {
         tracingContextDeferred <- Deferred[IO, TracingContext[IO]]
-        _ <- myEndpoint.toTracedRoute[IO](
-            (_, ctx: TracingContext[IO]) => tracingContextDeferred.complete(ctx) *> IO.pure(Right("Ok"))
+        _ <- myEndpoint
+          .toTracedRoute[IO](
+            (_, ctx: TracingContext[IO]) =>
+              tracingContextDeferred.complete(ctx) *> IO.pure(Right("Ok"))
           )
           .run(request)
           .value
@@ -29,7 +32,8 @@ class TapirSpec extends AsyncFunSpec with Matchers {
 
     it("Should serve a the correct response when the endpoint is called with a valid request") {
       val output = java.util.UUID.randomUUID().toString
-      myEndpoint.toTracedRoute[IO](
+      myEndpoint
+        .toTracedRoute[IO](
           (_, _) => IO.pure(Right(output))
         )
         .run(request)
@@ -57,7 +61,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
 
   case class EndpointError(message: String) extends RuntimeException
 
-  implicit def endpointErrorCodec: CodecForOptional[EndpointError, MediaType.TextPlain, String] =
+  implicit def endpointErrorCodec: CodecForOptional[EndpointError, CodecFormat.TextPlain, String] =
     CodecForOptional.fromCodec(
       Codec.stringPlainCodecUtf8.mapDecode(str => DecodeResult.Value(EndpointError(str)))(
         err => s"Message: ${err.message}"
