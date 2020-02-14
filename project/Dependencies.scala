@@ -4,7 +4,7 @@ object Dependencies {
   val scalaTest = "org.scalatest" %% "scalatest" % "3.1.1"
   val cats = "org.typelevel" %% "cats-core" % "2.0.0"
   val catsEffect = "org.typelevel" %% "cats-effect" % "2.0.0"
-  val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.0"
+  val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.19"
   val kindProjector = "org.typelevel" %% "kind-projector" % "0.10.3"
 
   object OpenTracing {
