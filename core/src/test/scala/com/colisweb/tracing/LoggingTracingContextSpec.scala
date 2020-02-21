@@ -5,8 +5,10 @@ import TestUtils._
 import cats.effect.IO
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.StrictLogging
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class LoggingTracingContextSpec extends FunSpec with Matchers with StrictLogging {
+class LoggingTracingContextSpec extends AnyFunSpec with Matchers with StrictLogging {
   describe("LoggingTracingContext") {
 
     it("Should log at the start and the end on the operation") {
