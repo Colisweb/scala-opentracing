@@ -2,12 +2,13 @@ package com.colisweb.tracing.tapir
 
 import org.scalatest._
 import org.http4s.Request
-import tapir._
+import sttp.tapir._
 import com.colisweb.tracing._
 import cats.effect._
 import cats.effect.concurrent.Deferred
 import cats.data.OptionT
 import cats.implicits._
+
 import scala.concurrent.ExecutionContext
 
 class TapirSpec extends AsyncFunSpec with Matchers {
@@ -57,7 +58,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
 
   case class EndpointError(message: String) extends RuntimeException
 
-  implicit def endpointErrorCodec: CodecForOptional[EndpointError, MediaType.TextPlain, String] =
+  implicit def endpointErrorCodec: CodecForOptional[EndpointError, CodecFormat.TextPlain, String] =
     CodecForOptional.fromCodec(
       Codec.stringPlainCodecUtf8.mapDecode(str => DecodeResult.Value(EndpointError(str)))(
         err => s"Message: ${err.message}"
@@ -82,8 +83,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
     ): TracingContextResource[cats.effect.IO] = ???
   }
 
-  implicit def mockedContextBuilder: TracingContextBuilder[IO] =
-    (_, _) => Resource.pure(mockedContext)
+  implicit def mockedContextBuilder: TracingContextBuilder[IO] = (_, _) => Resource.pure[IO, TracingContext[IO]](mockedContext)
 
   implicit def cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 }

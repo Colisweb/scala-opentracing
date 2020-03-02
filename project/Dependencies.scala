@@ -2,9 +2,9 @@ import sbt._
 
 object Dependencies {
   val scalaTest = "org.scalatest" %% "scalatest" % "3.0.8"
-  val cats = "org.typelevel" %% "cats-core" % "2.0.0"
-  val catsEffect = "org.typelevel" %% "cats-effect" % "2.0.0"
-  val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.0"
+  val cats = "org.typelevel" %% "cats-core" % "2.1.1"
+  val catsEffect = "org.typelevel" %% "cats-effect" % "2.1.1"
+  val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.21.1"
   val kindProjector = "org.typelevel" %% "kind-projector" % "0.10.3"
 
   object OpenTracing {
@@ -16,9 +16,9 @@ object Dependencies {
   }
 
   object Tapir {
-    final val version = "0.9.1"
-    final val core = "com.softwaremill.tapir" %% "tapir-core" % version
-    final val http4sServer = "com.softwaremill.tapir" %% "tapir-http4s-server" % version
+    final val version = "0.12.23"
+    final val core = "com.softwaremill.sttp.tapir" %% "tapir-core" % version
+    final val http4sServer = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % version
     final val all = Seq(core, http4sServer)
   }
 
