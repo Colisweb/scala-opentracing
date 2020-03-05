@@ -9,6 +9,8 @@ import cats.effect.concurrent.Deferred
 import cats.data.OptionT
 import cats.implicits._
 import scala.concurrent.ExecutionContext
+import org.scalatest.funspec.AsyncFunSpec
+import org.scalatest.matchers.should.Matchers
 
 class TapirSpec extends AsyncFunSpec with Matchers {
   describe("Tapir Integration") {
