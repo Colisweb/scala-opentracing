@@ -9,8 +9,10 @@ import com.typesafe.scalalogging.StrictLogging
 import com.colisweb.tracing.implicits._
 import TestUtils._
 import com.colisweb.tracing.datadog.DDTracingContext
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class LogCorrelationSpec extends FunSpec with StrictLogging with Matchers {
+class LogCorrelationSpec extends AnyFunSpec with StrictLogging with Matchers {
 
   implicit val slf4jLogger: org.slf4j.Logger = logger.underlying
 
