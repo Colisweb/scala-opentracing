@@ -2,7 +2,7 @@ package com.colisweb.tracing.http.client
 
 import java.util.UUID
 
-import com.colisweb.tracing.context.InfrastructureContext
+import com.colisweb.tracing.context.TracingContext
 import org.http4s.{Header, Request}
 
 trait RequestWithCorrelationId {
@@ -18,8 +18,8 @@ trait RequestWithCorrelationId {
 
     def withCorrelationId: Request[F] = injectCorrelationIdToRequest(UUID.randomUUID().toString)
 
-    def withCorrelationId(infrastructureContext: InfrastructureContext[F]): Request[F] =
-      injectCorrelationIdToRequest(infrastructureContext.correlationId)
+    def withCorrelationId(context: TracingContext[F]): Request[F] =
+      injectCorrelationIdToRequest(context.correlationId)
 
   }
 

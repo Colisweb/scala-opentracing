@@ -3,7 +3,6 @@ package com.colisweb.tracing.http.server
 import cats.data._
 import cats.effect._
 import com.colisweb.tracing.context.{TracingContext, TracingContextBuilder}
-import com.colisweb.tracing.http4s._
 import org.http4s._
 import sttp.tapir.Endpoint
 import sttp.tapir.server.http4s.{Http4sServerOptions, _}
@@ -12,6 +11,7 @@ import scala.reflect.ClassTag
 
 trait TracedRoutes {
   implicit class TracedEndpoint[I, E, O](e: Endpoint[I, E, O, Nothing]) {
+
 
     def toTracedRoute[F[_]: Sync](logic: (I, TracingContext[F]) => F[Either[E, O]])(
         implicit builder: TracingContextBuilder[F],

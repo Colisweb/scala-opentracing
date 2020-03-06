@@ -6,9 +6,9 @@ import _root_.datadog.opentracing._
 import cats.data._
 import cats.effect._
 import com.colisweb.tracing.TestUtils._
-import com.colisweb.tracing.context.{Tags, TracingContext, TracingContextResource}
+import com.colisweb.tracing.context.{TracingContext, TracingContextResource}
 import com.colisweb.tracing.datadog.DDTracingContext
-import com.colisweb.tracing.implicits._
+import com.colisweb.tracing.domain.Tags
 import com.typesafe.scalalogging.StrictLogging
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -56,7 +56,7 @@ class LogCorrelationSpec extends AnyFunSpec with StrictLogging with Matchers {
     val tracer = new DDTracer()
     val span: DDSpan = tracer.activeSpan().asInstanceOf[DDSpan]
 
-    new DDTracingContext[IO](tracer, span, "Mocked service") {
+    new DDTracingContext[IO](tracer, span, "Mocked service", UUID.randomUUID().toString) {
       override def childSpan(operationName: String, tags: Tags): TracingContextResource[IO] = ???
       override def spanId: cats.data.OptionT[cats.effect.IO, String] = _spanId
       override def traceId: cats.data.OptionT[cats.effect.IO, String] = _traceId

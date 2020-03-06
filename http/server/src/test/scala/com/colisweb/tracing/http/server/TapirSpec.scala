@@ -1,13 +1,17 @@
 package com.colisweb.tracing.http.server
 
+import java.util.UUID
+
 import cats.data.OptionT
-import cats.effect.{ContextShift, IO, Resource}
 import cats.effect.concurrent.Deferred
+import cats.effect.{ContextShift, IO, Resource}
 import cats.implicits._
-import com.colisweb.tracing.context.{Tags, TracingContext, TracingContextBuilder, TracingContextResource}
+import com.colisweb.tracing.context.{TracingContext, TracingContextBuilder, TracingContextResource}
+import com.colisweb.tracing.domain.{PureLogger, Tags}
 import org.http4s.Request
 import org.scalatest.funspec.AsyncFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.slf4j.Logger
 import sttp.tapir._
 
 import scala.concurrent.ExecutionContext
@@ -70,6 +74,9 @@ class TapirSpec extends AsyncFunSpec with Matchers {
   val mockedContext: TracingContext[IO] = new TracingContext[IO] {
     override def spanId: OptionT[IO, String] = OptionT.pure(randomSpanId)
     override def traceId: OptionT[IO, String] = OptionT.pure(randomSpanId)
+    override def correlationId: String = UUID.randomUUID().toString
+    override def logger(implicit slf4jLogger: Logger): PureLogger[IO] = PureLogger(slf4jLogger)
+
     def addTags(tags: Tags): cats.effect.IO[Unit] = IO.unit
     def childSpan(
         operationName: String,

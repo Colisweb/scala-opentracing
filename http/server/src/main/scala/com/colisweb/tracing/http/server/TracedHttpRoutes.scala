@@ -1,4 +1,4 @@
-package com.colisweb.tracing.http4s
+package com.colisweb.tracing.http.server
 
 import cats.data._
 import cats.effect._

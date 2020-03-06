@@ -2,10 +2,9 @@ package com.colisweb.tracing.domain
 
 import org.slf4j.Logger
 
-trait DomainContext[F[_]] {
+trait LoggingContext[F[_]] {
 
-  def addToMDC(key: String, value: String): Unit
+  def addTags(tags: Tags): F[Unit]
 
   def logger(implicit slf4jLogger: Logger): PureLogger[F]
-
 }

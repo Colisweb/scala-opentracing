@@ -2,9 +2,11 @@ package com.colisweb.tracing.context
 
 import cats.effect._
 import cats.implicits._
+import com.colisweb.tracing.domain.{PureLogger, Tags}
 import com.typesafe.scalalogging.StrictLogging
 import io.opentracing._
 import io.opentracing.util.GlobalTracer
+import org.slf4j.Logger
 
 /**
   * This is meant to be used with any OpenTracing compatible tracer.
@@ -12,7 +14,8 @@ import io.opentracing.util.GlobalTracer
   */
 class OpenTracingContext[F[_]: Sync, T <: Tracer, S <: Span](
     tracer: T,
-    span: S
+    span: S,
+    override val correlationId: String
 ) extends TracingContext[F] {
 
   def childSpan(
@@ -21,7 +24,8 @@ class OpenTracingContext[F[_]: Sync, T <: Tracer, S <: Span](
   ): TracingContextResource[F] =
     OpenTracingContext[F, T, S](
       tracer,
-      Some(span)
+      Some(span),
+      correlationId
     )(
       operationName,
       tags
@@ -32,6 +36,8 @@ class OpenTracingContext[F[_]: Sync, T <: Tracer, S <: Span](
       case (key, value) => span.setTag(key, value)
     }
   }
+
+  override def logger(implicit slf4jLogger: Logger): PureLogger[F] = PureLogger[F](slf4jLogger)
 }
 
 object OpenTracingContext extends StrictLogging {
@@ -42,13 +48,14 @@ object OpenTracingContext extends StrictLogging {
     */
   def apply[F[_]: Sync, T <: Tracer, S <: Span](
       tracer: T,
-      parentSpan: Option[S] = None
+      parentSpan: Option[S] = None,
+      correlationId: String
   )(
       operationName: String,
       tags: Tags = Map.empty
   ): TracingContextResource[F] =
     spanResource(tracer, operationName, parentSpan)
-      .map(new OpenTracingContext(tracer, _))
+      .map(new OpenTracingContext(tracer, _, correlationId))
       .evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
 
   /**
@@ -56,9 +63,10 @@ object OpenTracingContext extends StrictLogging {
     * This may be necessary depending on the concrete tracing system you use.
     */
   def getOpenTracingContextBuilder[F[_]: Sync, T <: Tracer, S <: Span](
-      tracer: T
+      tracer: T,
+      correlationId: String
   ): F[TracingContextBuilder[F]] =
-    registerGlobalTracer(tracer).map(_ => OpenTracingContext(tracer))
+    registerGlobalTracer(tracer).map(_ => OpenTracingContext(tracer, correlationId = correlationId))
 
   def registerGlobalTracer[F[_]: Sync](tracer: Tracer): F[Unit] = Sync[F].delay {
     if (GlobalTracer.isRegistered()) {

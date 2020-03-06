@@ -2,7 +2,6 @@ package com.colisweb.tracing.logging
 
 import cats.effect.Sync
 import cats.syntax.all._
-import com.colisweb.tracing.context.TracingContext
 import com.colisweb.tracing.domain.PureLogger
 import org.slf4j.{Logger, Marker}
 
@@ -17,12 +16,11 @@ object TracingLogger {
     */
   def pureTracingLogger[F[_]: Sync](
       logger: Logger,
-      tracingContext: TracingContext[F],
-      markerFactory: TracingContext[F] => F[Marker]
+      ctxMarker: F[Marker]
   ): PureLogger[F] = {
     val pureLogger = PureLogger[F](logger)
     def addCtxMarker(marker: Option[Marker]): F[Marker] =
-      markerFactory(tracingContext).map(m => combineMarkers(marker, m))
+      ctxMarker.map(m => combineMarkers(marker, m))
 
     new PureLogger[F] {
       def trace(msg: String, args: Object*): F[Unit] =
@@ -30,35 +28,35 @@ object TracingLogger {
       def trace(marker: Marker, msg: String, args: Object*): F[Unit] =
         addCtxMarker(Some(marker)).flatMap(m => pureLogger.trace(m, msg, args: _*))
       def trace(msg: String, throwable: Throwable): F[Unit] =
-        addCtxMarker(None).flatMap(_ => pureLogger.trace(msg,throwable))
+        addCtxMarker(None).flatMap(_ => pureLogger.trace(msg, throwable))
 
       def debug(msg: String, args: Object*): F[Unit] =
         addCtxMarker(None).flatMap(m => pureLogger.debug(m, msg, args: _*))
       def debug(marker: Marker, msg: String, args: Object*): F[Unit] =
         addCtxMarker(Some(marker)).flatMap(m => pureLogger.debug(m, msg, args: _*))
       def debug(msg: String, throwable: Throwable): F[Unit] =
-        addCtxMarker(None).flatMap(_ => pureLogger.debug(msg,throwable))
+        addCtxMarker(None).flatMap(_ => pureLogger.debug(msg, throwable))
 
       def info(msg: String, args: Object*): F[Unit] =
         addCtxMarker(None).flatMap(m => pureLogger.info(m, msg, args: _*))
       def info(marker: Marker, msg: String, args: Object*): F[Unit] =
         addCtxMarker(Some(marker)).flatMap(m => pureLogger.info(m, msg, args: _*))
       def info(msg: String, throwable: Throwable): F[Unit] =
-        addCtxMarker(None).flatMap(_ => pureLogger.info(msg,throwable))
+        addCtxMarker(None).flatMap(_ => pureLogger.info(msg, throwable))
 
       def warn(msg: String, args: Object*): F[Unit] =
         addCtxMarker(None).flatMap(m => pureLogger.warn(m, msg, args: _*))
       def warn(marker: Marker, msg: String, args: Object*): F[Unit] =
         addCtxMarker(Some(marker)).flatMap(m => pureLogger.warn(m, msg, args: _*))
       def warn(msg: String, throwable: Throwable): F[Unit] =
-        addCtxMarker(None).flatMap(_ => pureLogger.warn(msg,throwable))
+        addCtxMarker(None).flatMap(_ => pureLogger.warn(msg, throwable))
 
       def error(msg: String, args: Object*): F[Unit] =
         addCtxMarker(None).flatMap(m => pureLogger.error(m, msg, args: _*))
       def error(marker: Marker, msg: String, args: Object*): F[Unit] =
         addCtxMarker(Some(marker)).flatMap(m => pureLogger.error(m, msg, args: _*))
       def error(msg: String, throwable: Throwable): F[Unit] =
-        addCtxMarker(None).flatMap(_ => pureLogger.error(msg,throwable))
+        addCtxMarker(None).flatMap(_ => pureLogger.error(msg, throwable))
 
     }
   }

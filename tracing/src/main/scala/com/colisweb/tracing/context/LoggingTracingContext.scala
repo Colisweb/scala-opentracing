@@ -1,11 +1,14 @@
 package com.colisweb.tracing.context
 
+import java.util.UUID
+
 import cats.data.OptionT
 import cats.effect._
 import cats.effect.concurrent.Ref
 import cats.syntax.all._
-import com.colisweb.tracing.domain.PureLogger
+import com.colisweb.tracing.domain.{PureLogger, Tags}
 import com.typesafe.scalalogging.StrictLogging
+import org.slf4j.Logger
 
 import scala.concurrent.duration.MILLISECONDS
 
@@ -18,7 +21,8 @@ import scala.concurrent.duration.MILLISECONDS
 class LoggingTracingContext[F[_]: Sync: Timer](
     traceIdP: String,
     spanIdP: String,
-    tagsRef: Ref[F, Tags]
+    tagsRef: Ref[F, Tags],
+    override val correlationId: String
 ) extends TracingContext[F] {
 
   override def spanId: OptionT[F, String] = OptionT.pure(spanIdP)
@@ -30,7 +34,9 @@ class LoggingTracingContext[F[_]: Sync: Timer](
       operationName: String,
       tags: Tags
   ): TracingContextResource[F] =
-    LoggingTracingContext(Some(this))(operationName)
+    LoggingTracingContext(Some(this), correlationId = correlationId)(operationName)
+
+  override def logger(implicit slf4jLogger: Logger): PureLogger[F] = PureLogger[F](slf4jLogger)
 }
 
 object LoggingTracingContext extends StrictLogging {
@@ -42,12 +48,13 @@ object LoggingTracingContext extends StrictLogging {
   def apply[F[_]: Sync: Timer](
       parentContext: Option[LoggingTracingContext[F]] = None,
       idGenerator: Option[F[String]] = None,
-      slf4jLogger: org.slf4j.Logger = logger.underlying
+      slf4jLogger: org.slf4j.Logger = logger.underlying,
+      correlationId: String = UUID.randomUUID().toString
   )(
       operationName: String,
       tags: Tags = Map.empty
   ): TracingContextResource[F] =
-    resource(parentContext, idGenerator, slf4jLogger, operationName)
+    resource(parentContext, idGenerator, slf4jLogger, operationName, correlationId)
       .evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
 
   /**
@@ -63,7 +70,8 @@ object LoggingTracingContext extends StrictLogging {
       parentContext: Option[LoggingTracingContext[F]],
       idGenerator: Option[F[String]],
       slf4jLogger: org.slf4j.Logger,
-      operationName: String
+      operationName: String,
+      correlationId: String
   ): TracingContextResource[F] = {
     val logger = PureLogger(slf4jLogger)
     val idGeneratorValue: F[String] = idGenerator.getOrElse(randomUUIDGenerator)
@@ -75,7 +83,7 @@ object LoggingTracingContext extends StrictLogging {
       spanId <- idGeneratorValue
       traceId <- traceIdF
       start <- Clock[F].monotonic(MILLISECONDS)
-      ctx = new LoggingTracingContext[F](traceId, spanId, tagsRef)
+      ctx = new LoggingTracingContext[F](traceId, spanId, tagsRef, correlationId)
       details = SpanDetails(start, traceId, spanId, ctx, tagsRef)
       _ <- logger.trace("Trace {} Starting Span {} ({})", traceId, spanId, operationName)
     } yield details

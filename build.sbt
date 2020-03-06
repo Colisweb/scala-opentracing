@@ -34,18 +34,18 @@ lazy val root = (project in file("."))
   .settings(
     skip in publish := true
   )
-  .aggregate(tracing, httpServer, httpClient, httpTest, amqp)
+  .aggregate(logging, tracing, httpServer, httpClient, httpTest, amqp)
 
-lazy val domain = Project(id = "scala-opentracing-domain", base = file("domain"))
+lazy val logging = Project(id = "scala-opentracing-logging", base = file("logging"))
   .settings(
-    name := "Scala Opentracing Domain",
-    bintrayPackage := "scala-opentracing-domain",
+    name := "Scala Opentracing Logging",
+    bintrayPackage := "scala-opentracing-logging",
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= Log.all ++ List(Cats.catsEffect)
   )
 
 lazy val tracing = Project(id = "scala-opentracing", base = file("tracing"))
-  .dependsOn(domain)
+  .dependsOn(logging)
   .settings(
     name := "Scala Opentracing",
     bintrayPackage := "scala-opentracing",

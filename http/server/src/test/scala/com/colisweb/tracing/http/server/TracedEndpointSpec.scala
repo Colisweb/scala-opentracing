@@ -4,7 +4,7 @@ import java.util.UUID
 
 import cats.effect.{ContextShift, IO, Resource, Timer}
 import com.colisweb.tracing.context.{NoOpTracingContext, TracingContext, TracingContextBuilder}
-import com.colisweb.tracing.domain.DomainContext
+import com.colisweb.tracing.domain.LoggingContext
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{Header, Request}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -20,7 +20,7 @@ final class TracedEndpointSpec extends AnyFlatSpec with Matchers {
   implicit val tcb: TracingContextBuilder[IO] = (_, _) =>
     Resource.pure[IO, TracingContext[IO]](NoOpTracingContext())
 
-  def dumbLogic: (Unit, DomainContext[IO]) => IO[Either[Unit, Unit]] = (_, _) => IO(Right(()))
+  def dumbLogic: (Unit, LoggingContext[IO]) => IO[Either[Unit, Unit]] = (_, _) => IO(Right(()))
 
   "A response" should "reuse the request's correlation id if it exists" in {
     val request: Request[IO] =
