@@ -25,7 +25,7 @@ object Dependencies {
   object Log {
     val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
     val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
-    val logstashLogbackEncoder = "net.logstash.logback" % "logstash-logback-encoder" % "6.1"
+    val logstashLogbackEncoder = "net.logstash.logback" % "logstash-logback-encoder" % "6.3"
 
     val all = Seq(
       logback,
