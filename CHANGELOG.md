@@ -10,7 +10,7 @@ More infos about this file : https://keepachangelog.com/
 
 ### Core
 
-- Breaking : `com.colisweb.tracing.TracingContext.TracingContextBuilder` has been moved to `com.colisweb.tracing.TracingContextBuilder`
+- Breaking : `com.colisweb.tracing.context.TracingContext.TracingContextBuilder` has been moved to `com.colisweb.tracing.TracingContextBuilder`
 - `LoggingTracingContext` now prints tags to the console
 - All tracing context companion objects now include a `get[...]TracingContextBuilder[F]` method that returns a `F[TracingContextBuilder[F]]` . The `TracingContext[F]` that this `TracingContextBuilder[F]` will build will have no parent span. This has been done for consitency with regard to the `DDTracingContext` which requires some effectful registration to be ran before the tracer can work properly.
 - Code has been reorganised so all implicits can be imported with `com.colisweb.tracing.implicits._`
