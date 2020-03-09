@@ -10,10 +10,10 @@ import sttp.tapir.server.http4s.{Http4sServerOptions, _}
 import scala.reflect.ClassTag
 
 trait TracedRoutes {
-  implicit class TracedEndpoint[I, E, O](e: Endpoint[I, E, O, Nothing]) {
 
+  implicit class TracedEndpoint[In, Err, Out](e: Endpoint[In, Err, Out, Nothing]) {
 
-    def toTracedRoute[F[_]: Sync](logic: (I, TracingContext[F]) => F[Either[E, O]])(
+    def toTracedRoute[F[_]: Sync](logic: (In, TracingContext[F]) => F[Either[Err, Out]])(
         implicit builder: TracingContextBuilder[F],
         cs: ContextShift[F],
         serverOptions: Http4sServerOptions[F]
@@ -24,7 +24,7 @@ trait TracedRoutes {
           e.toRoutes(input => logic(input, req.tracingContext))(
               serverOptions,
               implicitly,
-              implicitly
+              cs
             )
             .run(req.request)
         },
@@ -33,12 +33,12 @@ trait TracedRoutes {
     }
   }
 
-  implicit class TracedEndpointRecoverErrors[I, E <: Throwable, O](
-      e: Endpoint[I, E, O, Nothing]
+  implicit class TracedEndpointRecoverErrors[In, Err <: Throwable, Out](
+      e: Endpoint[In, Err, Out, Nothing]
   ) {
-    def toTracedRouteRecoverErrors[F[_]: Sync](logic: (I, TracingContext[F]) => F[O])(
+    def toTracedRouteRecoverErrors[F[_]: Sync](logic: (In, TracingContext[F]) => F[Out])(
         implicit builder: TracingContextBuilder[F],
-        eClassTag: ClassTag[E],
+        eClassTag: ClassTag[Err],
         cs: ContextShift[F],
         serverOptions: Http4sServerOptions[F]
     ): HttpRoutes[F] =

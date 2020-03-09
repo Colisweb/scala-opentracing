@@ -9,21 +9,22 @@ import org.slf4j.Logger
   * as a mock implementation for your tests of if you need to disable tracing
   * conditionally
   */
-class NoOpTracingContext[F[_]: Sync] extends TracingContext[F] {
+class NoOpTracingContext[F[_]: Sync](override val correlationId: String) extends TracingContext[F] {
 
   def addTags(tags: Tags): F[Unit] = Sync[F].unit
 
   def childSpan(operationName: String, tags: Tags): TracingContextResource[F] =
-    Resource.pure(NoOpTracingContext())
+    Resource.pure(NoOpTracingContext(correlationId))
 
   override def logger(implicit slf4jLogger: Logger): PureLogger[F] = PureLogger[F](slf4jLogger)
-
-  override def correlationId: String = "no-op-tracing-context"
 }
 
 object NoOpTracingContext {
-  def apply[F[_]: Sync]() = new NoOpTracingContext[F]
+  def apply[F[_]: Sync](correlationId: String) = new NoOpTracingContext[F](correlationId)
 
-  def getNoOpTracingContextBuilder[F[_]: Sync]: F[TracingContextBuilder[F]] =
-    Sync[F].pure((_, _) => Resource.pure(NoOpTracingContext[F]()))
+  def builder[F[_]: Sync](): F[TracingContextBuilder[F]] =
+    Sync[F].delay((_: String, _: Tags, correlationId: String) =>
+      Resource.pure(NoOpTracingContext(correlationId = correlationId))
+    )
+
 }

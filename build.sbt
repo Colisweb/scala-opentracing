@@ -31,9 +31,7 @@ ThisBuild / releaseProcess := Seq[ReleaseStep](
 resolvers += Resolver.sonatypeRepo("releases")
 
 lazy val root = (project in file("."))
-  .settings(
-    skip in publish := true
-  )
+  .settings(skip in publish := true)
   .aggregate(logging, tracing, httpServer, httpClient, httpTest, amqp)
 
 lazy val logging = Project(id = "scala-opentracing-logging", base = file("logging"))

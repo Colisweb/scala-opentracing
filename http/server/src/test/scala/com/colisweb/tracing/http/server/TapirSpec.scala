@@ -91,8 +91,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
       )
     )
 
-  implicit def mockedContextBuilder: TracingContextBuilder[IO] =
-    (_, _) => Resource.pure[IO, TracingContext[IO]](mockedContext)
+  implicit def mockedContextBuilder: TracingContextBuilder[IO] = (_,_,_) => Resource.pure[IO, TracingContext[IO]](mockedContext)
 
   implicit def cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 }

@@ -1,7 +1,5 @@
 package com.colisweb.tracing.datadog
 
-import java.util.UUID
-
 import _root_.datadog.opentracing._
 import _root_.datadog.trace.api.DDTags.SERVICE_NAME
 import cats.data.OptionT
@@ -78,7 +76,7 @@ object DDTracingContext extends StrictLogging {
       tracer: DDTracer,
       serviceName: String,
       parentSpan: Option[DDSpan] = None,
-      correlationId: String = UUID.randomUUID().toString
+      correlationId: String
   )(
       operationName: String,
       tags: Tags = Map.empty
@@ -97,6 +95,15 @@ object DDTracingContext extends StrictLogging {
       }
     } yield tracer
 
-  def getDDTracingContextBuilder[F[_]: Sync](serviceName: String): F[TracingContextBuilder[F]] =
-    buildAndRegisterDDTracer.map(tracer => apply(tracer, serviceName))
+  def builder[F[_]: Sync](name: String): F[TracingContextBuilder[F]] =
+    Sync[F].delay((operationName: String, tags: Tags, correlationId: String) =>
+      for {
+        tracer <- Resource.liftF(buildAndRegisterDDTracer)
+        logger <- DDTracingContext.apply(
+          tracer = tracer,
+          serviceName = name,
+          correlationId = correlationId
+        )(operationName, tags)
+      } yield logger
+    )
 }

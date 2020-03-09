@@ -20,7 +20,7 @@ object TestServer {
       server2Port: Int
   ): Resource[F, Server[F]] =
     for {
-      tracingContextBuilder <- Resource.liftF(NoOpTracingContext.getNoOpTracingContextBuilder[F])
+      tracingContextBuilder <- Resource.liftF(NoOpTracingContext.builder())
       client <- BlazeClientBuilder[F](ExecutionContext.global).resource
       service = new ServerService(client, server2Port)
       server <- BlazeServerBuilder[F]
@@ -44,7 +44,7 @@ final class ServerService[F[_]: Sync: ContextShift: Timer: ConcurrentEffect](
 
   def routes(implicit tracingContextBuilder: TracingContextBuilder[F]): HttpApp[F] =
     greetEndpointDefinition
-      .toRouteWithApplicationContext[F] { (_, context) =>
+      .toTracedRoute[F] { (_, context) =>
         val server2GreetingsEndpoint: Uri =
           Uri.unsafeFromString(s"http://localhost:$server2Port/where_the_weed_at")
         client.fetch(

@@ -1,7 +1,5 @@
 package com.colisweb.tracing.context
 
-import java.util.UUID
-
 import cats.data.OptionT
 import cats.effect._
 import cats.effect.concurrent.Ref
@@ -49,22 +47,13 @@ object LoggingTracingContext extends StrictLogging {
       parentContext: Option[LoggingTracingContext[F]] = None,
       idGenerator: Option[F[String]] = None,
       slf4jLogger: org.slf4j.Logger = logger.underlying,
-      correlationId: String = UUID.randomUUID().toString
+      correlationId: String = ""
   )(
       operationName: String,
       tags: Tags = Map.empty
   ): TracingContextResource[F] =
     resource(parentContext, idGenerator, slf4jLogger, operationName, correlationId)
       .evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
-
-  /**
-    * Returns a F[TracingContextBuilder[F]]
-    *
-    * This is provided for convenience and conistency with regards to the other
-    * tracing contexts types.
-    */
-  def getLoggingTracingContextBuilder[F[_]: Sync: Timer]: F[TracingContextBuilder[F]] =
-    Sync[F].pure(LoggingTracingContext())
 
   private def resource[F[_]: Sync: Timer](
       parentContext: Option[LoggingTracingContext[F]],
@@ -117,4 +106,15 @@ object LoggingTracingContext extends StrictLogging {
       ctx: LoggingTracingContext[F],
       tagsRef: Ref[F, Tags]
   )
+
+  /**
+    * Returns a F[TracingContextBuilder[F]]
+    *
+    * This is provided for convenience and consistency with regards to the other
+    * tracing contexts types.
+    */
+  def builder[F[_]: Sync: Timer]: F[TracingContextBuilder[F]] =
+    Sync[F].delay((operationName: String, tags: Tags, correlationId: String) =>
+      LoggingTracingContext.apply(correlationId = correlationId)(operationName, tags)
+    )
 }
