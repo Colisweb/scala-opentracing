@@ -1,3 +1,3 @@
-package com.colisweb.tracing.context
+package com.colisweb.tracing.core
 
 package object implicits extends Syntax
