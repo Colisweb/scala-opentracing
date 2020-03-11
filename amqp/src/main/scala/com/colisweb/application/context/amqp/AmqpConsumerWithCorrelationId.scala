@@ -2,23 +2,20 @@ package com.colisweb.application.context.amqp
 
 import java.util.UUID
 
-import dev.profunktor.fs2rabbit.model.{AmqpEnvelope, AmqpProperties}
+import dev.profunktor.fs2rabbit.model.AmqpEnvelope
 import fs2.Stream
 
 trait AmqpConsumerWithCorrelationId {
 
   implicit final class AmqpConsumerWithCorrelationId[F[_], T](stream: Stream[F, AmqpEnvelope[T]]) {
 
-    def withCorrelationId: Stream[F, AmqpEnvelope[T]] = stream.map(addCorrelationId)
+    def withCorrelationId: Stream[F, AmqpEnvelope[T]] = stream.map(enrichWithCorrelationId)
 
-    private def addCorrelationId(envelope: AmqpEnvelope[T]): AmqpEnvelope[T] =
-      envelope.copy(properties = addCoId(envelope.properties))
-
-    private def addCoId(properties: AmqpProperties): AmqpProperties =
-      properties.copy(
-        correlationId = properties.correlationId.orElse(Some(UUID.randomUUID.toString))
-      )
-
+    private def enrichWithCorrelationId(envelope: AmqpEnvelope[T]): AmqpEnvelope[T] = {
+      val properties = envelope.properties
+      val correlationId = properties.correlationId.orElse(Some(UUID.randomUUID.toString))
+      val propertiesWithId = properties.copy(correlationId = correlationId)
+      envelope.copy(properties = propertiesWithId)
+    }
   }
-
 }

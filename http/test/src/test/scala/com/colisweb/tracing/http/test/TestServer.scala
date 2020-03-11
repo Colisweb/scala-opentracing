@@ -3,7 +3,8 @@ package com.colisweb.tracing.http.test
 import cats.Applicative
 import cats.effect.{ConcurrentEffect, ContextShift, Resource, Sync, Timer}
 import cats.implicits._
-import com.colisweb.tracing.context.{NoOpTracingContext, TracingContextBuilder}
+import com.colisweb.tracing.context.NoOpTracingContext
+import com.colisweb.tracing.domain.TracingContextBuilder
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits._

@@ -6,8 +6,7 @@ import cats.data.OptionT
 import cats.effect.concurrent.Deferred
 import cats.effect.{ContextShift, IO, Resource}
 import cats.implicits._
-import com.colisweb.tracing.context.{TracingContext, TracingContextBuilder, TracingContextResource}
-import com.colisweb.tracing.domain.{PureLogger, Tags}
+import com.colisweb.tracing.domain._
 import org.http4s.Request
 import org.scalatest.funspec.AsyncFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -17,6 +16,7 @@ import sttp.tapir._
 import scala.concurrent.ExecutionContext
 
 class TapirSpec extends AsyncFunSpec with Matchers {
+  import TapirSpec._
 
   describe("Tapir Integration") {
     it("Should create a tracing context and pass it to the logic function") {
@@ -28,7 +28,8 @@ class TapirSpec extends AsyncFunSpec with Matchers {
           )
           .run(request)
           .value
-        receivedTracingContext <- tracingContextDeferred.get
+        tracingContext <- tracingContextDeferred.get
+        receivedTracingContext = tracingContext.asInstanceOf[MockedTracingContext]
       } yield {
         receivedTracingContext.traceId shouldBe mockedContext.traceId
         receivedTracingContext.spanId shouldBe mockedContext.spanId
@@ -62,6 +63,20 @@ class TapirSpec extends AsyncFunSpec with Matchers {
     }
   }
 
+}
+object TapirSpec {
+  implicit def endpointErrorCodec: CodecForOptional[EndpointError, CodecFormat.TextPlain, String] =
+    CodecForOptional.fromCodec(
+      Codec.stringPlainCodecUtf8.mapDecode(str => DecodeResult.Value(EndpointError(str)))(err =>
+        s"Message: ${err.message}"
+      )
+    )
+
+  implicit def mockedContextBuilder: TracingContextBuilder[IO] =
+    (_, _, _) => Resource.pure[IO, TracingContext[IO]](mockedContext)
+
+  implicit def cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+
   case class EndpointError(message: String) extends RuntimeException
 
   val myEndpoint: Endpoint[Unit, Unit, String, Nothing] =
@@ -71,27 +86,20 @@ class TapirSpec extends AsyncFunSpec with Matchers {
 
   val randomSpanId: String = java.util.UUID.randomUUID().toString
 
-  val mockedContext: TracingContext[IO] = new TracingContext[IO] {
-    override def spanId: OptionT[IO, String] = OptionT.pure(randomSpanId)
-    override def traceId: OptionT[IO, String] = OptionT.pure(randomSpanId)
+  val mockedContext = new MockedTracingContext
+
+  class MockedTracingContext extends TracingContext[IO] {
+
+    def spanId: OptionT[IO, String] = OptionT.pure(randomSpanId)
+    def traceId: OptionT[IO, String] = OptionT.pure(randomSpanId)
     override def correlationId: String = UUID.randomUUID().toString
     override def logger(implicit slf4jLogger: Logger): PureLogger[IO] = PureLogger(slf4jLogger)
 
     def addTags(tags: Tags): cats.effect.IO[Unit] = IO.unit
-    def childSpan(
+    def span(
         operationName: String,
         tags: Tags
     ): TracingContextResource[cats.effect.IO] = ???
   }
 
-  implicit def endpointErrorCodec: CodecForOptional[EndpointError, CodecFormat.TextPlain, String] =
-    CodecForOptional.fromCodec(
-      Codec.stringPlainCodecUtf8.mapDecode(str => DecodeResult.Value(EndpointError(str)))(err =>
-        s"Message: ${err.message}"
-      )
-    )
-
-  implicit def mockedContextBuilder: TracingContextBuilder[IO] = (_,_,_) => Resource.pure[IO, TracingContext[IO]](mockedContext)
-
-  implicit def cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 }

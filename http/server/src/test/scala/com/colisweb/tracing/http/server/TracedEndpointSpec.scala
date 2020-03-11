@@ -1,8 +1,8 @@
 package com.colisweb.tracing.http.server
 
 import cats.effect.{ContextShift, IO, Timer}
-import com.colisweb.tracing.context.{NoOpTracingContext, TracingContextBuilder}
-import com.colisweb.tracing.domain.LoggingContext
+import com.colisweb.tracing.context.NoOpTracingContext
+import com.colisweb.tracing.domain.{TracingContext, TracingContextBuilder}
 import com.colisweb.tracing.http.server.TracedHttpRoutes._
 import org.http4s.Request
 import org.http4s.util.CaseInsensitiveString
@@ -18,7 +18,7 @@ final class TracedEndpointSpec extends AnyFlatSpec with Matchers {
   implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
   implicit val tcb: TracingContextBuilder[IO] = NoOpTracingContext.builder[IO]().unsafeRunSync()
 
-  def dumbLogic: (Unit, LoggingContext[IO]) => IO[Either[Unit, Unit]] = (_, _) => IO(Right(()))
+  def dumbLogic: (Unit, TracingContext[IO]) => IO[Either[Unit, Unit]] = (_, _) => IO(Right(()))
 
   "A response" should "reuse the request's correlation id if it exists" in {
     val (enrichedRequest, correlationId) = enrichRequest(Request[IO]())

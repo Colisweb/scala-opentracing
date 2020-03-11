@@ -92,9 +92,9 @@ automatically closed at the end of the computation. You can use the `TracingCont
 ```scala
 val result: IO[Int] = tracingContextBuilder("Parent context", Map.empty) use { parentCtx =>
   // Some work here ...
-  parentCtx.childSpan("Child context") use { _ =>
+  parentCtx.span("Child context") use { _ =>
     IO { /* And some work there */ }
-  } *> parentCtx.childSpan("Sibling context") use { _ =>
+  } *> parentCtx.span("Sibling context") use { _ =>
     IO { 20 + 20 }
   }
 }
@@ -155,7 +155,7 @@ object MyRoutes {
   def routes(implicit tracingContextBuilder: TracingContextBuilder[IO]): HttpRoutes[IO] =
     TracedHttpRoutes[IO] {
       case (req @ POST -> Root / "endpoint") using tracingContext =>
-        val result = tracingContext.childSpan("Some computation") wrap IO {
+        val result = tracingContext.span("Some computation") wrap IO {
           // Something here ...
         }
 
@@ -186,7 +186,7 @@ val myEndpoint: Endpoint[Unit, Unit, String, Nothing] =
   endpoint.get.in("/hello").out(stringBody)
 
 val routes: HttpRoutes[IO] = myEndpoint.toTracedRoute[IO](
-  (input, ctx) => ctx.childSpan("Some description") use { _ =>
+  (input, ctx) => ctx.span("Some description") use { _ =>
     IO.pure(Right("OK"))
   }
 )
@@ -234,7 +234,7 @@ object MyRoutes extends StrictLogging {
   def routes(implicit tracingContextBuilder: TracingContextBuilder[IO]): HttpRoutes[IO] =
     TracedHttpRoutes[IO] {
       case (req @ POST -> Root / "endpoint") using tracingContext =>
-        val result = tracingContext.childSpan("Some computation") use { ctx =>
+        val result = tracingContext.span("Some computation") use { ctx =>
           ctx.logger.debug("Doing stuff") *> IO {
             // Something here ...
           }

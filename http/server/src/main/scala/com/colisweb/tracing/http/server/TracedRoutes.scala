@@ -2,10 +2,10 @@ package com.colisweb.tracing.http.server
 
 import cats.data._
 import cats.effect._
-import com.colisweb.tracing.context.{TracingContext, TracingContextBuilder}
+import com.colisweb.tracing.domain.{TracingContext, TracingContextBuilder}
 import org.http4s._
 import sttp.tapir.Endpoint
-import sttp.tapir.server.http4s.{Http4sServerOptions, _}
+import sttp.tapir.server.http4s._
 
 import scala.reflect.ClassTag
 

@@ -32,21 +32,22 @@ resolvers += Resolver.sonatypeRepo("releases")
 
 lazy val root = (project in file("."))
   .settings(skip in publish := true)
-  .aggregate(logging, tracing, httpServer, httpClient, httpTest, amqp)
+  .aggregate(core, context, httpServer, httpClient, httpTest, amqp)
 
-lazy val logging = Project(id = "scala-opentracing-logging", base = file("logging"))
+lazy val amqp = Project(id = "scala-opentracing-amqp", base = file("amqp"))
   .settings(
-    name := "Scala Opentracing Logging",
-    bintrayPackage := "scala-opentracing-logging",
+    libraryDependencies ++= List(fs2Rabbit, TestsDependencies.scalatest)
+  )
+
+lazy val core = Project(id = "scala-opentracing-core", base = file("core"))
+  .settings(
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= Log.all ++ List(Cats.catsEffect)
   )
 
-lazy val tracing = Project(id = "scala-opentracing", base = file("tracing"))
-  .dependsOn(logging)
+lazy val context = Project(id = "scala-opentracing-context", base = file("context"))
+  .dependsOn(core)
   .settings(
-    name := "Scala Opentracing",
-    bintrayPackage := "scala-opentracing",
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= OpenTracing.all
       ++ Seq(
@@ -61,22 +62,18 @@ lazy val tracing = Project(id = "scala-opentracing", base = file("tracing"))
 lazy val httpServer =
   Project(id = "scala-opentracing-http4s-server-tapir", base = file("http/server"))
     .settings(
-      name := "Scala Opentracing Tapir Integration",
-      bintrayPackage := "scala-opentracing-http4s-server-tapir",
       crossScalaVersions := supportedScalaVersions,
       libraryDependencies ++= Tapir.all ++ Seq(
         compilerPlugin(kindProjector),
         TestsDependencies.scalatest
       )
     )
-    .dependsOn(tracing)
+    .dependsOn(context)
 
 lazy val httpClient =
   Project(id = "scala-opentracing-http4s-client-blaze", base = file("http/client"))
-    .dependsOn(tracing)
+    .dependsOn(context)
     .settings(
-      name := "Scala Opentracing Blaze Integration",
-      bintrayPackage := "scala-opentracing-http4s-client-blaze",
       libraryDependencies ++= List(Http4s.blazeClient)
     )
 
@@ -86,10 +83,4 @@ lazy val httpTest = Project(id = "scala-opentracing-http4s-test", base = file("h
     libraryDependencies ++= TestsDependencies.utils ++ TestsDependencies.circeAll,
     scalacOptions ++= Seq("-Ypartial-unification"),
     skip in publish := true
-  )
-
-lazy val amqp = Project(id = "scala-opentracing-amqp", base = file("amqp"))
-  .dependsOn(tracing)
-  .settings(
-    libraryDependencies ++= List(fs2Rabbit, TestsDependencies.scalatest)
   )
