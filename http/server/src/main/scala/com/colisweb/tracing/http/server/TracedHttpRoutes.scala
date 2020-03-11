@@ -5,7 +5,7 @@ import java.util.UUID
 import cats.data._
 import cats.effect._
 import cats.implicits._
-import com.colisweb.tracing.domain.{TracingContext, TracingContextBuilder}
+import com.colisweb.tracing.core.{TracingContext, TracingContextBuilder}
 import io.opentracing._
 import io.opentracing.tag.Tags._
 import org.http4s._

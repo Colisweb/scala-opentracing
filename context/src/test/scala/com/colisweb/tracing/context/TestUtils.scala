@@ -1,4 +1,4 @@
-package com.colisweb.tracing
+package com.colisweb.tracing.context
 
 import scala.concurrent._
 import scala.concurrent.duration._

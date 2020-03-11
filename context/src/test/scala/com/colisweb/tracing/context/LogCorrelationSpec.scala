@@ -1,16 +1,16 @@
-package com.colisweb.tracing
+package com.colisweb.tracing.context
 
 import java.util.UUID
 
 import _root_.datadog.opentracing._
 import cats.data._
 import cats.effect._
-import com.colisweb.tracing.TestUtils._
-import com.colisweb.tracing.datadog.DDTracingContext
-import com.colisweb.tracing.domain.{Tags, TracingContext, TracingContextResource}
+import com.colisweb.tracing.context.datadog.DDTracingContext
+import com.colisweb.tracing.core.{Tags, TracingContext, TracingContextResource}
 import com.typesafe.scalalogging.StrictLogging
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import TestUtils._
 
 class LogCorrelationSpec extends AnyFunSpec with StrictLogging with Matchers {
 

@@ -2,7 +2,7 @@ package com.colisweb.tracing.http.client
 
 import java.util.UUID
 
-import com.colisweb.tracing.domain.TracingContext
+import com.colisweb.tracing.core.TracingContext
 import org.http4s.{Header, Request}
 
 trait RequestWithCorrelationId {

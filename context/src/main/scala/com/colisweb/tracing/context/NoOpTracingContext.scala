@@ -1,7 +1,7 @@
 package com.colisweb.tracing.context
 
 import cats.effect.{Resource, Sync}
-import com.colisweb.tracing.domain.{PureLogger, Tags, TracingContext, TracingContextBuilder, TracingContextResource}
+import com.colisweb.tracing.core._
 import org.slf4j.Logger
 
 /**

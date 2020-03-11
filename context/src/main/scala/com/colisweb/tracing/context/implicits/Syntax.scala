@@ -1,4 +1,4 @@
-package com.colisweb.tracing.implicits
+package com.colisweb.tracing.context.implicits
 
 import cats.effect._
 import cats.data._

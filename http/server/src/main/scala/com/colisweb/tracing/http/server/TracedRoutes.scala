@@ -2,7 +2,7 @@ package com.colisweb.tracing.http.server
 
 import cats.data._
 import cats.effect._
-import com.colisweb.tracing.domain.{TracingContext, TracingContextBuilder}
+import com.colisweb.tracing.core.{TracingContext, TracingContextBuilder}
 import org.http4s._
 import sttp.tapir.Endpoint
 import sttp.tapir.server.http4s._

@@ -1,8 +1,8 @@
-package com.colisweb.tracing.logging
+package com.colisweb.tracing.context.logging
 
 import cats.effect.Sync
 import cats.syntax.all._
-import com.colisweb.tracing.domain.PureLogger
+import com.colisweb.tracing.core.PureLogger
 import org.slf4j.{Logger, Marker}
 
 object TracingLogger {

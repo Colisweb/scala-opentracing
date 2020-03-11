@@ -1,8 +1,7 @@
-package com.colisweb.tracing
+package com.colisweb.tracing.context
 
 import cats.effect.IO
-import com.colisweb.tracing.TestUtils._
-import com.colisweb.tracing.context.LoggingTracingContext
+import TestUtils._
 import com.typesafe.scalalogging.StrictLogging
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

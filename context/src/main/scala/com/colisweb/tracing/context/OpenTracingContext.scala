@@ -2,7 +2,7 @@ package com.colisweb.tracing.context
 
 import cats.effect._
 import cats.implicits._
-import com.colisweb.tracing.domain.{PureLogger, Tags, TracingContext, TracingContextBuilder, TracingContextResource}
+import com.colisweb.tracing.core._
 import com.typesafe.scalalogging.StrictLogging
 import io.opentracing._
 import io.opentracing.util.GlobalTracer

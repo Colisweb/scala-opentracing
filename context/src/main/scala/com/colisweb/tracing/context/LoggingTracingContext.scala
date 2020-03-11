@@ -4,7 +4,7 @@ import cats.data.OptionT
 import cats.effect._
 import cats.effect.concurrent.Ref
 import cats.syntax.all._
-import com.colisweb.tracing.domain.{PureLogger, Tags, TracingContext, TracingContextBuilder, TracingContextResource}
+import com.colisweb.tracing.core._
 import com.typesafe.scalalogging.StrictLogging
 import org.slf4j.Logger
 

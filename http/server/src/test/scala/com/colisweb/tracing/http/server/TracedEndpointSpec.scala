@@ -2,7 +2,7 @@ package com.colisweb.tracing.http.server
 
 import cats.effect.{ContextShift, IO, Timer}
 import com.colisweb.tracing.context.NoOpTracingContext
-import com.colisweb.tracing.domain.{TracingContext, TracingContextBuilder}
+import com.colisweb.tracing.core.{TracingContext, TracingContextBuilder}
 import com.colisweb.tracing.http.server.TracedHttpRoutes._
 import org.http4s.Request
 import org.http4s.util.CaseInsensitiveString

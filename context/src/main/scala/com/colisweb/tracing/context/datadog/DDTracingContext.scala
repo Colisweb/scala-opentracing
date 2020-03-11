@@ -1,4 +1,4 @@
-package com.colisweb.tracing.datadog
+package com.colisweb.tracing.context.datadog
 
 import _root_.datadog.opentracing._
 import _root_.datadog.trace.api.DDTags.SERVICE_NAME
@@ -6,8 +6,8 @@ import cats.data.OptionT
 import cats.effect._
 import cats.syntax.all._
 import com.colisweb.tracing.context.OpenTracingContext
-import com.colisweb.tracing.domain.{PureLogger, Tags, TracingContext, TracingContextBuilder, TracingContextResource}
-import com.colisweb.tracing.logging.TracingLogger
+import com.colisweb.tracing.context.logging.TracingLogger
+import com.colisweb.tracing.core._
 import com.typesafe.scalalogging.StrictLogging
 import net.logstash.logback.marker.Markers.appendEntries
 import org.slf4j.{Logger, Marker}

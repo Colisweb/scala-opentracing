@@ -1,4 +1,4 @@
-package com.colisweb.tracing.domain
+package com.colisweb.tracing.core
 
 import org.slf4j.Logger
 
