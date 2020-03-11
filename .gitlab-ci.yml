@@ -1,33 +1,33 @@
-image: hseeberger/scala-sbt:11.0.3_1.2.8_2.12.8
+include:
+  - 'https://gitlab.com/colisweb-open-source/ci-common/raw/v7.8.2/templates/scala.yml'
 
-stages:
-  - test
-  - release
+.opentracing-test:
+  extends: .sbt-test
+  tags: []
 
-test:
-  stage: test
-  script:
-    - sbt clean test
-  variables:
-    CI: "true"
-    GIT_STRATEGY: clone
+test scala-opentracing-amqp:
+  extends: .opentracing-test
 
-release on bintray:
-  stage: release
-  only:
-    refs:
-      - master
-  script:
-    - git config --global user.email $GITLAB_USER_EMAIL
-    - git config --global user.name "$GITLAB_USER_NAME"
-    - git remote set-url origin https://gitlab.ci1:$GIT_CI_PASS@gitlab.com/$CI_PROJECT_PATH.git
-    - git fetch origin
-    - git checkout $CI_COMMIT_REF_NAME 
-    - sbt -Dbintray.user=gitlab-ci -Dbintray.pass=$BINTRAY_PASS "release skip-tests with-defaults"
-    - git checkoout develop
-    - git merge $CI_COMMIT_REF_NAME --ff-only
-    - git push origin develop --force
+test scala-opentracing-core:
+  extends: .opentracing-test
 
-before_script:
-  - gpg --import  <(echo "$GITLAB_PGP_PRIVATE_KEY")
-  - source <(gpg -q --decrypt secrets-env.sh.secret)
+test scala-opentracing-context:
+  extends: .opentracing-test
+
+test scala-opentracing-http4s-server-tapir:
+  extends: .opentracing-test
+
+test scala-opentracing-http4s-client-blaze:
+  extends: .opentracing-test
+
+test scala-opentracing-http4s-test:
+  extends: .opentracing-test
+
+version:
+  extends: .version
+  tags: []
+
+publish on bintray:
+  extends: .bintray-publish
+  tags: []
+
