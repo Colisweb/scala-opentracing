@@ -62,13 +62,15 @@ object OpenTracingContext extends StrictLogging {
     * Registers the tracer as the GlobalTracer and returns a F[TracingContextBuilder[F]].
     * This may be necessary depending on the concrete tracing system you use.
     */
-  def builder[F[_]: Sync, T <: Tracer, S <: Span](tracer: T): F[TracingContextBuilder[F]] =
-    Sync[F].delay((operationName: String, tags: Tags, correlationId: String) =>
-      for {
-        _ <- Resource.liftF(registerGlobalTracer(tracer))
-        ctx <- OpenTracingContext(tracer, correlationId = correlationId)(operationName, tags)
-      } yield ctx
-    )
+  def builder[F[_]: Sync, T <: Tracer, S <: Span](tracer: T): F[TracingContextBuilder[F]] = {
+    for {
+      _ <- registerGlobalTracer(tracer)
+    } yield
+      new TracingContextBuilder[F] {
+        override def build(operationName: String, tags: Tags, correlationId: String): TracingContextResource[F] =
+          OpenTracingContext(tracer, correlationId = correlationId)(operationName, tags)
+      }
+  }
 
   def registerGlobalTracer[F[_]: Sync](tracer: Tracer): F[Unit] = Sync[F].delay {
     if (GlobalTracer.isRegistered) {

@@ -47,7 +47,7 @@ object LoggingTracingContext extends StrictLogging {
       parentContext: Option[LoggingTracingContext[F]] = None,
       idGenerator: Option[F[String]] = None,
       slf4jLogger: org.slf4j.Logger = logger.underlying,
-      correlationId: String = ""
+      correlationId: String
   )(
       operationName: String,
       tags: Tags = Map.empty

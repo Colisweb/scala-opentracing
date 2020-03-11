@@ -67,6 +67,20 @@ class DDTracingContext[F[_]: Sync](
 }
 
 object DDTracingContext extends StrictLogging {
+  def builder[F[_]: Sync](name: String): F[TracingContextBuilder[F]] = {
+    for {
+      tracer <- buildAndRegisterDDTracer
+    } yield { (operationName: String, tags: Tags, correlationId: String) =>
+      {
+        DDTracingContext.apply(
+          tracer = tracer,
+          serviceName = name,
+          correlationId = correlationId
+        )(operationName, tags)
+      }
+    }
+  }
+
   def apply[F[_]: Sync](
       tracer: DDTracer,
       serviceName: String,
@@ -74,14 +88,14 @@ object DDTracingContext extends StrictLogging {
       correlationId: String
   )(
       operationName: String,
-      tags: Tags = Map.empty
+      tags: Tags
   ): TracingContextResource[F] =
     OpenTracingContext
       .spanResource(tracer, operationName, parentSpan)
       .map(new DDTracingContext(tracer, _, serviceName, correlationId))
       .evalMap(ctx => ctx.addTags(tags + (SERVICE_NAME -> serviceName)).map(_ => ctx))
 
-  private def buildAndRegisterDDTracer[F[_]: Sync] =
+  private def buildAndRegisterDDTracer[F[_]: Sync]: F[DDTracer] =
     for {
       tracer <- Sync[F].delay(new DDTracer())
       _ <- OpenTracingContext.registerGlobalTracer(tracer)
@@ -89,16 +103,4 @@ object DDTracingContext extends StrictLogging {
         _root_.datadog.trace.api.GlobalTracer.registerIfAbsent(tracer)
       }
     } yield tracer
-
-  def builder[F[_]: Sync](name: String): F[TracingContextBuilder[F]] =
-    Sync[F].delay((operationName: String, tags: Tags, correlationId: String) =>
-      for {
-        tracer <- Resource.liftF(buildAndRegisterDDTracer)
-        logger <- DDTracingContext.apply(
-          tracer = tracer,
-          serviceName = name,
-          correlationId = correlationId
-        )(operationName, tags)
-      } yield logger
-    )
 }
