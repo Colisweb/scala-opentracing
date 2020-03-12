@@ -1,7 +1,9 @@
 package com.colisweb.tracing.context.datadog
 
+import _root_.datadog.opentracing.DDTracer.DDTracerBuilder
 import _root_.datadog.opentracing._
 import _root_.datadog.trace.api.DDTags.SERVICE_NAME
+import _root_.datadog.trace.api.{GlobalTracer => DDGlobalTracer}
 import cats.data.OptionT
 import cats.effect._
 import cats.syntax.all._
@@ -9,6 +11,7 @@ import com.colisweb.tracing.context.OpenTracingContext
 import com.colisweb.tracing.context.logging.TracingLogger
 import com.colisweb.tracing.core._
 import com.typesafe.scalalogging.StrictLogging
+import io.opentracing.util.{GlobalTracer => OpenGlobalTracer}
 import net.logstash.logback.marker.Markers.appendEntries
 import org.slf4j.{Logger, Marker}
 
@@ -29,12 +32,12 @@ class DDTracingContext[F[_]: Sync](
 
   def traceId: OptionT[F, String] =
     OptionT.liftF(Sync[F] delay {
-      span.getTraceId
+      span.getTraceId.toString
     })
 
   def spanId: OptionT[F, String] =
     OptionT.liftF(Sync[F] delay {
-      span.getSpanId
+      span.getSpanId.toString
     })
 
   override def span(operationName: String, tags: Tags = Map.empty): TracingContextResource[F] =
@@ -97,10 +100,8 @@ object DDTracingContext extends StrictLogging {
 
   private def buildAndRegisterDDTracer[F[_]: Sync]: F[DDTracer] =
     for {
-      tracer <- Sync[F].delay(new DDTracer())
-      _ <- OpenTracingContext.registerGlobalTracer(tracer)
-      _ <- Sync[F].delay {
-        _root_.datadog.trace.api.GlobalTracer.registerIfAbsent(tracer)
-      }
+      tracer <- Sync[F].delay(new DDTracerBuilder().build())
+      _ = OpenGlobalTracer.registerIfAbsent(tracer)
+      _ = DDGlobalTracer.registerIfAbsent(tracer)
     } yield tracer
 }

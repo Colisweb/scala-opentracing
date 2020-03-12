@@ -7,14 +7,13 @@ object Dependencies {
   object Cats {
     final val cats = "org.typelevel" %% "cats-core" % "2.0.0"
     final val catsEffect = "org.typelevel" %% "cats-effect" % "2.0.0"
-
   }
 
   object OpenTracing {
-    final val opentracing = "0.31.0"
+    final val opentracing = "0.33.0"
     final val api = "io.opentracing" % "opentracing-api" % opentracing
     final val util = "io.opentracing" % "opentracing-util" % opentracing
-    final val dd = "com.datadoghq" % "dd-trace-ot" % "0.30.0"
+    final val dd = "com.datadoghq" % "dd-trace-ot" % "0.45.0"
     final val all = Seq(api, util, dd)
   }
 
@@ -33,7 +32,6 @@ object Dependencies {
     final val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.19"
 
     final val all = List(blazeClient, core)
-
   }
 
   object Log {
@@ -47,8 +45,6 @@ object Dependencies {
       logstashLogbackEncoder
     )
   }
-
-
 }
 
 object TestsDependencies {

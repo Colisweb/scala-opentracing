@@ -64,20 +64,12 @@ object OpenTracingContext extends StrictLogging {
     */
   def builder[F[_]: Sync, T <: Tracer, S <: Span](tracer: T): F[TracingContextBuilder[F]] = {
     for {
-      _ <- registerGlobalTracer(tracer)
+      _ <- Sync[F].delay(GlobalTracer.registerIfAbsent(tracer))
     } yield
       new TracingContextBuilder[F] {
         override def build(operationName: String, tags: Tags, correlationId: String): TracingContextResource[F] =
           OpenTracingContext(tracer, correlationId = correlationId)(operationName, tags)
       }
-  }
-
-  def registerGlobalTracer[F[_]: Sync](tracer: Tracer): F[Unit] = Sync[F].delay {
-    if (GlobalTracer.isRegistered) {
-      logger.debug(s"Opentracing GlobalTracer is already registered. Skipping registration.")
-    } else {
-      GlobalTracer.register(tracer)
-    }
   }
 
   private[tracing] def spanResource[F[_]: Sync, T <: Tracer, S <: Span](

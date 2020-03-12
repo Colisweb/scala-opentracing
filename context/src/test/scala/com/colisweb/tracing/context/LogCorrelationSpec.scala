@@ -2,7 +2,6 @@ package com.colisweb.tracing.context
 
 import java.util.UUID
 
-import _root_.datadog.opentracing._
 import cats.data._
 import cats.effect._
 import com.colisweb.tracing.context.datadog.DDTracingContext
@@ -11,6 +10,8 @@ import com.typesafe.scalalogging.StrictLogging
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import TestUtils._
+import _root_.datadog.opentracing._
+import _root_.datadog.opentracing.DDTracer.DDTracerBuilder
 
 class LogCorrelationSpec extends AnyFunSpec with StrictLogging with Matchers {
 
@@ -52,7 +53,7 @@ class LogCorrelationSpec extends AnyFunSpec with StrictLogging with Matchers {
       _spanId: OptionT[IO, String],
       _traceId: OptionT[IO, String]
   ): TracingContext[IO] = {
-    val tracer = new DDTracer()
+    val tracer = new DDTracerBuilder().build()
     val span: DDSpan = tracer.activeSpan().asInstanceOf[DDSpan]
 
     new DDTracingContext[IO](tracer, span, "Mocked service", UUID.randomUUID().toString) {
