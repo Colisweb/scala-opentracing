@@ -1,5 +1,5 @@
 include:
-  - 'https://gitlab.com/colisweb-open-source/ci-common/raw/v7.8.2/templates/scala.yml'
+  - 'https://gitlab.com/colisweb-open-source/ci-common/raw/v7.9.1/templates/scala.yml'
 
 .opentracing-test:
   extends: .sbt-test

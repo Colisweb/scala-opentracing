@@ -1,8 +1,7 @@
 import CompileFlags._
 import Dependencies._
-import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
-lazy val scala212 = "2.12.9"
+lazy val scala212 = "2.12.10"
 lazy val scala211 = "2.11.12"
 lazy val supportedScalaVersions = List(scala212, scala211)
 
@@ -13,20 +12,6 @@ ThisBuild / bintrayOrganization := Some("colisweb")
 ThisBuild / licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 ThisBuild / parallelExecution := false
 ThisBuild / scalacOptions ++= flags
-
-// Release settings
-ThisBuild / releaseCommitMessage := s"[ci skip] Setting version to ${(version in ThisBuild).value}"
-ThisBuild / releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  releaseStepTask(publish),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
-)
 
 resolvers += Resolver.sonatypeRepo("releases")
 
