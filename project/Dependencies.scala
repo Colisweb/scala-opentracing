@@ -63,7 +63,7 @@ object TestsDependencies {
 
   final val requests = "com.lihaoyi" %% "requests" % "0.5.1" % Test
   final val scalatest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
-  final val wiremock = "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test
+  final val wiremock = "com.github.tomakehurst" % "wiremock" % "2.26.3" % Test
 
   final val utils = List(requests, scalatest, wiremock)
 }
