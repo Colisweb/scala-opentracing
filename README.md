@@ -26,40 +26,57 @@ Add our Bintray repository to your resolvers :
 resolvers += Resolver.bintrayRepo("colisweb", "maven")
 ```
 
-And add the library to your dependencies :
+And add the core library to your dependencies :
 
 ```scala
-libraryDependencies += "com.colisweb" %% "scala-opentracing" % "0.1.0"
+  libraryDependencies += "com.colisweb" %% "scala-opentracing-core" % "2.1.0"
 ```
 
 ## Usage
 
 ## Creating a TracingContext explicitly
 
-A `TracingContext[F[_]]` represents some unit of work, associated with a unique `spanId`, and which can spawn child units of work. This library provides
-four instances of `TracingContext` so far: `OpenTracingContext`, `DDTracingContext`, `LoggingTracingContext` and `NoOpTracingContext` that does nothing in particular.
+A `TracingContext[F[_]]` represents some unit of work, which can spawn child units of work. 
+
+This library provides multiples instances of `TracingContext`:
+ * `OpenTracingContext`
+ * `DDTracingContext`
+ * `LoggingTracingContext`
+ * `NoOpTracingContext`
+
+All of these contexts can be added to your project by adding the following import:
+```scala
+  libraryDependencies += "com.colisweb" %% "scala-opentracing-context" % "2.1.0"
+```
 
 If you use Datadog, create a `DDTracingContext`, otherwise use `OpenTracingContext`. Both will rely on some `Tracer`, provided by whatever tracing
 library you use (Jaeger, Datadog ...).
 
-In examples, we'll use `IO` from Cats effect as our `F` but you can use any monad that satisfies the `Sync` Typeclass, like `Task` from Monix.
+In the following examples, we'll use `IO` from Cats effect as our `F` but you can use any monad that satisfies the `Sync` Typeclass, like `Task` from Monix.
 
 ```scala
 import io.opentracing._
-import com.colisweb.tracing._
+import com.colisweb.tracing.context._
 
 val tracer: Tracer = ???
-val tracingContextBuilder = OpenTracingContext[IO, Tracer, Span](tracer) _
+val tracingContextBuilder: IO[TracingContextBuilder[IO]] = OpenTracingContext.builder[IO, Tracer, Span](tracer)
 ```
+
+All contexts possess a `builder` method which return a `F[TracingContextBuilder[F]]`
+Arguments that needs to be passed may differ based on the implementation.
+However, `TracingContextBuilder[F]` possess a single method which take the `operation name` and some `tags`.
+
 ### Creating a TracingContext for Datadog
 
-Datadog requires that you create a tracer and then register it as the "Global tracer" for your application. For convenience and purity, this library
-includes a utility method that will create and register the tracer for you, and return an `F[TracingContextBuilder[F]]`.
+Datadog requires that you create a tracer and then register it as the "Global tracer" for your application. 
+
+For convenience and purity, this library creates and register the tracer itself.
+ 
 
 ```scala
-import com.colisweb.tracing.datadog._
+import com.colisweb.tracing.context.datadog._
 
-val tracingContextBuilderIO: IO[TracingContextBuilder[IO]] = DDTracingContext.getDDTracingContextBuilder[IO]("your-service-name")
+val tracingContextBuilder: IO[TracingContextBuilder[IO]] = DDTracingContext.builder[IO]("your-service-name")
 ```
 
 Don't evaluate this effect multiple times, as it will recreate a new tracer every time. Instead, use it in the *main* of your application, and propagate
@@ -71,7 +88,7 @@ For development or fast prototyping purposes, you can also use `LoggingTracingCo
 output, along with the time every operation took in milliseconds.
 
 ```scala
-val tracingContextBuilder = LoggingTracingContext[IO]() _
+val tracingContextBuilder: IO[TracingContextBuilder[IO]] = LoggingTracingContext.builder[IO]()
 ```
 
 To see the logs, make sur the `trace` level is enabled in SLF4J.
@@ -108,7 +125,7 @@ If you don't need to create child contexts, you can import the `wrap` convenienc
 by importing `com.colisweb.tracing.implicits._`.
 
 ```scala
-import com.colisweb.implicits._
+import com.colisweb.tracing.core.implicits._
 
 val result: IO[Int] = tracingContextBuilder("Parent context", Map.empty) wrap IO {
   // Some work
@@ -122,7 +139,7 @@ Sometimes, you will need to trace a computation and get back an `EitherT[F, Erro
 of a regular `F[A]`. For convinience, this library also provides the `either` and `option` operations on `Resource[F, A]`.
 
 ```scala
-import com.colisweb.tracing.implicits._
+import com.colisweb.tracing.core.implicits._
 
 val computation: Option[IO, Int] = ???
 
@@ -130,7 +147,7 @@ val result: OptionT[IO, Int] = tracingContextBuilder("Parent context", Map.empty
 ```
 
 ```scala
-import com.colisweb.tracing.implicits._
+import com.colisweb.tracing.core.implicits._
 
 val computation: EitherT[IO, Throwable, Int] = ???
 
@@ -145,11 +162,17 @@ all requests in a tracing context, which you can retrieve in your routes to inst
 To create a `TracedHttpRoutes[F[_]]`, you will need an implicit `TracingContextBuilder[F[_]]` in scope. You can then retrieve the
 tracing context with the `using` extractor from `com.colisweb.tracing.TracedHttpRoutes._`
 
+All of these functionnalities are present in the http package of the library.
+
+```scala
+libraryDependencies += "com.colisweb" %% "scala-opentracing-http4s-server-tapir" % "2.1.0"
+```
+
 ```scala
 import org.http4s.dsl.io._
-import com.colisweb.tracing.http4s.TracedHttpRoutes
-import com.colisweb.tracing.http4s.TracedHttpRoutes._
-import com.colisweb.tracing.TracingContextBuilder
+import com.colisweb.tracing.http.server.TracedHttpRoutes
+import com.colisweb.tracing.http.server.TracedHttpRoutes._
+import com.colisweb.tracing.core.TracingContextBuilder
 
 object MyRoutes {
   def routes(implicit tracingContextBuilder: TracingContextBuilder[IO]): HttpRoutes[IO] =
@@ -173,14 +196,11 @@ from your actual business logic. Tapir definitions can be *interpreted* into htt
 The package `scala-opentracing-tapir` provides a small integration layer that allows you
 to create traced http endpoints from tapir `Endpoint` definitions.
 
-```
-libraryDependencies += "com.colisweb" %% "scala-opentracing-tapir-integration" % "0.1.0"
-```
 
 ```scala
 import cats.effect.IO
 import tapir._
-import com.colisweb.tracing.tapir._
+import com.colisweb.tracing.http.server._
 
 val myEndpoint: Endpoint[Unit, Unit, String, Nothing] =
   endpoint.get.in("/hello").out(stringBody)
@@ -201,14 +221,19 @@ equivalent of `toTracedRoute` from `tapir-http4s-server`.
 
 ## Correlating your logs
 
-If you want to link your traces and your logs together, you can do it manually by adding the `traceId` of the context
-to your messages.
+If you want to link your traces and your logs together, you can do it manually by adding the `correlationId` of the context
+to your messages. A `PureLogger` is available in the `core` module. It wraps a logger with a `Sync[_]`.
 
 ```scala
+
+import com.colisweb.tracing.core.PureLogger
+import org.slf4j.{Logger, LoggerFactory}
+
+val logger: Logger = LoggerFactory.getLogger(getClass)
+val pureLogger: PureLogger[IO] = PureLogger(logger)
+
 val result: IO[Int] = tracingContextBuilder("Heavy mathematics", Map.empty) use { ctx =>
-  ctx.traceId.value flatMap { traceId =>
-    logger.debug("Doing stuff. Trace id : {}", traceId)
-  } *> IO {
+    pureLogger.debug("Doing stuff. correlation id : {}", ctx.correlationId) *> IO {
     // Some computation here
   }
 } 
@@ -216,16 +241,19 @@ val result: IO[Int] = tracingContextBuilder("Heavy mathematics", Map.empty) use 
 
 ### Automatic correlation for Datadog
 
-For people who use Datadog, we provide a wrapper around `Logger` from SLF4J that will automatically
+`DDTracingContext[F[_]]` possess internally a `spanId` and a `traceId`. We provide a wrapper
+around `Logger` that is `TracingLogger` from SLF4J that will automatically
 add the `spanId` and `traceId` to your logs. The logging side-effect is already wrapped in `F` for
 purity.
+
+You can directly use the `TracingLogger` to set your own `markers`. These will be added to all logs.
 
 ```scala
 import org.http4s.dsl.io._
 import com.typesafe.scalalogging.StrictLogging
-import com.colisweb.tracing.http4s.TracedHttpRoutes
-import com.colisweb.tracing.http4s.TracedHttpRoutes._
-import com.colisweb.tracing._
+import com.colisweb.tracing.http.server.TracedHttpRoutes
+import com.colisweb.tracing.http.server.TracedHttpRoutes._
+import com.colisweb.tracing.core._
 
 object MyRoutes extends StrictLogging {
   // You will need an implicit Logger from slf4j to use the logging facility
