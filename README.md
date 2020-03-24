@@ -143,24 +143,33 @@ This library provides `TracedHttpRoutes[F[_]]`, a function that works just like 
 all requests in a tracing context, which you can retrieve in your routes to instrument subsequent computations.
 
 To create a `TracedHttpRoutes[F[_]]`, you will need an implicit `TracingContextBuilder[F[_]]` in scope. You can then retrieve the
-tracing context with the `using` extractor from `com.colisweb.tracing.TracedHttpRoutes._`
+tracing context with the `using` extractor from `com.colisweb.tracing.http.server.TracedHttpRoute._`
+
+```
+libraryDependencies += "com.colisweb" %% "scala-opentracing-core"                % "2.1.0"
+libraryDependencies += "com.colisweb" %% "scala-opentracing-http4s-server-tapir" % "2.1.0"
+```
 
 ```scala
+import cats.effect.IO
+import com.colisweb.tracing.core.TracingContextBuilder
+import com.colisweb.tracing.core.implicits._
+import com.colisweb.tracing.http.server.TracedHttpRoutes
+import com.colisweb.tracing.http.server.TracedHttpRoutes._
+import org.http4s.HttpRoutes
 import org.http4s.dsl.io._
-import com.colisweb.tracing.http4s.TracedHttpRoutes
-import com.colisweb.tracing.http4s.TracedHttpRoutes._
-import com.colisweb.tracing.TracingContextBuilder
 
 object MyRoutes {
+
   def routes(implicit tracingContextBuilder: TracingContextBuilder[IO]): HttpRoutes[IO] =
     TracedHttpRoutes[IO] {
       case (req @ POST -> Root / "endpoint") using tracingContext =>
         val result = tracingContext.span("Some computation") wrap IO {
-          // Something here ...
-        }
-
+            // Something here ...
+          }
         result.flatMap(Ok(_))
     }
+
 }
 ```
 
