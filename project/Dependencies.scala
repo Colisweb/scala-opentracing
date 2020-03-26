@@ -29,7 +29,7 @@ object Dependencies {
 
     final val blazeClient = "org.http4s" %% "http4s-blaze-client" % version
     final val core = "org.http4s" %% "http4s-core" % version
-    final val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.19"
+    final val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.20"
 
     final val all = List(blazeClient, core)
   }
