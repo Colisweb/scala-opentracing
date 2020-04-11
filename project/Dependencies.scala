@@ -13,7 +13,7 @@ object Dependencies {
     final val opentracing = "0.33.0"
     final val api = "io.opentracing" % "opentracing-api" % opentracing
     final val util = "io.opentracing" % "opentracing-util" % opentracing
-    final val dd = "com.datadoghq" % "dd-trace-ot" % "0.46.0"
+    final val dd = "com.datadoghq" % "dd-trace-ot" % "0.48.0"
     final val all = Seq(api, util, dd)
   }
 
@@ -29,7 +29,7 @@ object Dependencies {
 
     final val blazeClient = "org.http4s" %% "http4s-blaze-client" % version
     final val core = "org.http4s" %% "http4s-core" % version
-    final val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.19"
+    final val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.21"
 
     final val all = List(blazeClient, core)
   }
@@ -61,9 +61,9 @@ object TestsDependencies {
 
   final val circeAll = List(core, generic, genericExtras, http4sCirce, tapirJsonCirce)
 
-  final val requests = "com.lihaoyi" %% "requests" % "0.2.0" % Test
+  final val requests = "com.lihaoyi" %% "requests" % "0.5.1" % Test
   final val scalatest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
-  final val wiremock = "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test
+  final val wiremock = "com.github.tomakehurst" % "wiremock" % "2.26.3" % Test
 
   final val utils = List(requests, scalatest, wiremock)
 }
