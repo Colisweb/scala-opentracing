@@ -15,7 +15,7 @@ import io.opentracing.util.{GlobalTracer => OpenGlobalTracer}
 import net.logstash.logback.marker.Markers.appendEntries
 import org.slf4j.{Logger, Marker}
 
-import scala.collection.JavaConverters.mapAsJavaMap
+import scala.jdk.CollectionConverters._
 
 /**
   * This tracing context is intended to be used with Datadog APM.
@@ -63,7 +63,7 @@ class DDTracingContext[F[_]: Sync](
       spanId <- spanIdMarker
       traceId <- traceIdMarker
     } yield appendEntries(
-      mapAsJavaMap(traceId ++ spanId)
+      (traceId ++ spanId).asJava
     )
 
   }

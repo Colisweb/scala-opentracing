@@ -2,7 +2,8 @@ import sbt._
 
 object Dependencies {
   final val fs2Rabbit = "dev.profunktor" %% "fs2-rabbit" % "2.1.1"
-  final val kindProjector = "org.typelevel" %% "kind-projector" % "0.10.3"
+  final val kindProjector = "org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full
+  final val scalaCollectionsCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.4"
 
   object Cats {
     final val cats = "org.typelevel" %% "cats-core" % "2.0.0"
@@ -29,7 +30,7 @@ object Dependencies {
 
     final val blazeClient = "org.http4s" %% "http4s-blaze-client" % version
     final val core = "org.http4s" %% "http4s-core" % version
-    final val http4sDsl = "org.http4s" %% "http4s-dsl" % "0.20.21"
+    final val http4sDsl = "org.http4s" %% "http4s-dsl" % version
 
     final val all = List(blazeClient, core)
   }
