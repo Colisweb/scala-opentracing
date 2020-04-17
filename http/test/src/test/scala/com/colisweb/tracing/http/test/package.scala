@@ -16,7 +16,7 @@ package object test {
     jsonOf[F, WrappedCorrelationId]
 
   implicit val responseWithCorrelationIdCodec: JsonCodec[WrappedCorrelationId] =
-    encoderDecoderCodec[WrappedCorrelationId]
+    circeCodec[WrappedCorrelationId]
 
   def greetEndpointDefinition: Endpoint[Unit, Unit, WrappedCorrelationId, Nothing] =
     endpoint.get

@@ -11,6 +11,7 @@ import org.http4s.Request
 import org.scalatest.funspec.AsyncFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.slf4j.Logger
+import sttp.tapir.Codec.string
 import sttp.tapir._
 
 import scala.concurrent.ExecutionContext
@@ -24,8 +25,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
         tracingContextDeferred <- Deferred[IO, TracingContext[IO]]
         _ <- myEndpoint
           .toTracedRoute[IO]((_, ctx: TracingContext[IO]) =>
-            tracingContextDeferred.complete(ctx) *> IO.pure(Right("Ok"))
-          )
+            tracingContextDeferred.complete(ctx) *> IO.pure(Right("Ok")))
           .run(request)
           .value
         tracingContext <- tracingContextDeferred.get
@@ -52,8 +52,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
       val endpointWithError = myEndpoint.errorOut(plainBody[EndpointError](endpointErrorCodec))
       endpointWithError
         .toTracedRouteRecoverErrors[IO]((_, _) =>
-          IO.raiseError(EndpointError("Something terrible happened"))
-        )
+          IO.raiseError(EndpointError("Something terrible happened")))
         .run(request)
         .value
         .map(_.get)
@@ -65,12 +64,10 @@ class TapirSpec extends AsyncFunSpec with Matchers {
 
 }
 object TapirSpec {
-  implicit def endpointErrorCodec: CodecForOptional[EndpointError, CodecFormat.TextPlain, String] =
-    CodecForOptional.fromCodec(
-      Codec.stringPlainCodecUtf8.mapDecode(str => DecodeResult.Value(EndpointError(str)))(err =>
-        s"Message: ${err.message}"
-      )
-    )
+  implicit def endpointErrorCodec: Codec[String, EndpointError, CodecFormat.TextPlain] =
+    string
+      .map(EndpointError)(error => s"Message: ${error.message}")
+      .schema(implicitly[Schema[EndpointError]])
 
   implicit def mockedContextBuilder: TracingContextBuilder[IO] =
     (_, _, _) => Resource.pure[IO, TracingContext[IO]](mockedContext)
