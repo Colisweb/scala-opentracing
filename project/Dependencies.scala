@@ -61,7 +61,7 @@ object TestsDependencies {
 
   final val circeAll = List(core, generic, genericExtras, http4sCirce, tapirJsonCirce)
 
-  final val requests = "com.lihaoyi" %% "requests" % "0.5.2" % Test
+  final val requests = "com.lihaoyi" %% "requests" % "0.6.0" % Test
   final val scalatest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
   final val wiremock = "com.github.tomakehurst" % "wiremock" % "2.26.3" % Test
 
