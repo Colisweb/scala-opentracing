@@ -14,7 +14,7 @@ object Versions {
   final val opentracing   = "0.33.0"
   final val requests      = "0.6.0"
   final val scalaLogging  = "3.9.2"
-  final val scalatest     = "3.1.1"
+  final val scalatest     = "3.1.2"
   final val tapir         = "0.14.3"
   final val wiremock      = "2.26.3"
 }
