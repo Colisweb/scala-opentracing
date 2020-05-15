@@ -12,7 +12,7 @@ object Versions {
   final val logstash      = "6.3"
   final val log4cats      = "1.0.1"
   final val opentracing   = "0.33.0"
-  final val requests      = "0.6.0"
+  final val requests      = "0.6.2"
   final val scalaLogging  = "3.9.2"
   final val scalatest     = "3.1.2"
   final val tapir         = "0.14.3"
