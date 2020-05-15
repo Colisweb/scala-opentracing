@@ -31,8 +31,6 @@ trait PureLogger[F[_]] {
 
 object PureLogger {
 
-  type LoggingFunction[F[_]] = (Option[Marker], String, Object*) => F[Unit]
-
   def apply[F[_]: Sync](logger: org.slf4j.Logger): PureLogger[F] =
     new PureLogger[F] {
 

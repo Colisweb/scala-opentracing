@@ -1,16 +1,16 @@
 import CompileFlags._
 
+lazy val scala213               = "2.13.1"
 lazy val scala212               = "2.12.10"
-lazy val scala211               = "2.11.12"
-lazy val supportedScalaVersions = List(scala212, scala211)
+lazy val supportedScalaVersions = List(scala213, scala212)
 
-ThisBuild / scalaVersion := scala212
+ThisBuild / scalaVersion := scala213
 ThisBuild / organization := "com.colisweb"
 ThisBuild / organizationName := "colisweb"
 ThisBuild / bintrayOrganization := Some("colisweb")
 ThisBuild / licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 ThisBuild / parallelExecution := false
-ThisBuild / scalacOptions ++= flags
+ThisBuild / scalacOptions ++= crossScalacOptions(scalaVersion.value)
 
 resolvers += Resolver.sonatypeRepo("releases")
 
@@ -78,6 +78,5 @@ lazy val httpTest = Project(id = "scala-opentracing-http4s-test", base = file("h
       TestsDependencies.wiremock,
       TestsDependencies.http4sBlazeClient,
     ),
-    scalacOptions ++= Seq("-Ypartial-unification"),
     skip in publish := true
   )

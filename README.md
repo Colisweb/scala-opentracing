@@ -3,11 +3,11 @@
 # Get Scala Opentracing
 
 ## Download from bintray
-![Download opentracing core](https://bintray.com/colisweb/maven/scala-opentracing-core/_latestVersion)  
-![Download opentracing context](https://bintray.com/colisweb/maven/scala-opentracing-context/_latestVersion)  
-![Download opentracing http server](https://bintray.com/colisweb/maven/scala-opentracing-http4s-server-tapir/_latestVersion)  
-![Download opentracing http client](https://bintray.com/colisweb/maven/scala-opentracing-http4s-client-blaze/_latestVersion)  
-![Download opentracing amqp](https://bintray.com/colisweb/maven/scala-opentracing-amqp/_latestVersion)  
+[Download opentracing core](https://bintray.com/colisweb/maven/scala-opentracing-core/_latestVersion)  
+[Download opentracing context](https://bintray.com/colisweb/maven/scala-opentracing-context/_latestVersion)  
+[Download opentracing http server](https://bintray.com/colisweb/maven/scala-opentracing-http4s-server-tapir/_latestVersion)  
+[Download opentracing http client](https://bintray.com/colisweb/maven/scala-opentracing-http4s-client-blaze/_latestVersion)  
+[Download opentracing amqp](https://bintray.com/colisweb/maven/scala-opentracing-amqp/_latestVersion)
 
 ## Download using sbt
 ```sbt
