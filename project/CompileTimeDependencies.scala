@@ -2,7 +2,7 @@ import sbt._
 
 object Versions {
 
-  final val cats            = "2.0.0"
+  final val cats            = "2.1.1"
   final val circe           = "0.13.0"
   final val datadog         = "0.49.0"
   final val fs2             = "2.1.1"
