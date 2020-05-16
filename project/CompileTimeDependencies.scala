@@ -11,7 +11,7 @@ object Versions {
   final val kindProjector   = "0.11.0"
   final val logback         = "1.2.3"
   final val logstash        = "6.3"
-  final val log4cats        = "1.0.1"
+  final val log4cats        = "1.1.1"
   final val opentracing     = "0.33.0"
   final val requests        = "0.6.2"
   final val scalaLogging    = "3.9.2"
