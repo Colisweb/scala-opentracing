@@ -7,7 +7,7 @@ object Versions {
   final val circe           = "0.13.0"
   final val datadog         = "0.49.0"
   final val fs2             = "2.1.1"
-  final val http4s          = "0.21.3"
+  final val http4s          = "0.21.4"
   final val kindProjector   = "0.11.0"
   final val logback         = "1.2.3"
   final val logstash        = "6.3"
