@@ -22,9 +22,10 @@ object TestServer {
   ): Resource[F, Server[F]] =
     for {
       tracingContextBuilder <- Resource.liftF(NoOpTracingContext.builder())
-      client <- BlazeClientBuilder[F](ExecutionContext.global).resource
+      exCtx = ExecutionContext.global
+      client <- BlazeClientBuilder[F](exCtx).resource
       service = new ServerService(client, server2Port)
-      server <- BlazeServerBuilder[F]
+      server <- BlazeServerBuilder.apply(exCtx)
         .bindLocal(serverPort)
         .withHttpApp(service.routes(tracingContextBuilder))
         .resource

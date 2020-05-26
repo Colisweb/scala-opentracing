@@ -1,7 +1,6 @@
 package com.colisweb.tracing.http.test
 
 import cats.effect.{ContextShift, ExitCode, IO, Resource, Timer}
-import cats.implicits._
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
