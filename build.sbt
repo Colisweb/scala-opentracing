@@ -40,6 +40,7 @@ lazy val context = Project(id = "scala-opentracing-context", base = file("contex
       CompileTimeDependencies.opentracingApi,
       CompileTimeDependencies.opentracingUtil,
       CompileTimeDependencies.opentracingDd,
+      CompileTimeDependencies.scalaCompat,
       CompileTimeDependencies.scalaLogging,
       CompileTimeDependencies.logstashLogbackEncoder,
       TestsDependencies.scalatest,
@@ -76,7 +77,7 @@ lazy val httpTest = Project(id = "scala-opentracing-http4s-test", base = file("h
       TestsDependencies.tapirJsonCirce,
       TestsDependencies.requests,
       TestsDependencies.wiremock,
-      TestsDependencies.http4sBlazeClient,
+      TestsDependencies.http4sBlazeClient
     ),
     skip in publish := true
   )

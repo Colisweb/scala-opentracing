@@ -14,6 +14,7 @@ object Versions {
   final val log4cats        = "1.1.1"
   final val opentracing     = "0.33.0"
   final val requests        = "0.6.2"
+  final val scalaCompat     = "2.1.6"
   final val scalaLogging    = "3.9.2"
   final val scalatest       = "3.1.2"
   final val scalaCollection = "2.1.4"
@@ -36,6 +37,7 @@ object CompileTimeDependencies {
   final val scalaLogging           = "com.typesafe.scala-logging"  %% "scala-logging"            % Versions.scalaLogging
   final val tapir                  = "com.softwaremill.sttp.tapir" %% "tapir-core"               % Versions.tapir
   final val tapirHttp4sServer      = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"      % Versions.tapir
+  final val scalaCompat            = "org.scala-lang.modules"      %% "scala-collection-compat"  % Versions.scalaCompat
 }
 
 object TestsDependencies {
