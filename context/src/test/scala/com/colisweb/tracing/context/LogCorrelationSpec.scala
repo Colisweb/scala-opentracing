@@ -11,7 +11,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import TestUtils._
 import _root_.datadog.opentracing._
-import _root_.datadog.opentracing.DDTracer.DDTracerBuilder
+import _root_.datadog.trace.core.DDSpan
 
 class LogCorrelationSpec extends AnyFunSpec with StrictLogging with Matchers {
 
@@ -53,7 +53,7 @@ class LogCorrelationSpec extends AnyFunSpec with StrictLogging with Matchers {
       _spanId: OptionT[IO, String],
       _traceId: OptionT[IO, String]
   ): TracingContext[IO] = {
-    val tracer = new DDTracerBuilder().build()
+    val tracer = DDTracer.builder().build()
     val span: DDSpan = tracer.activeSpan().asInstanceOf[DDSpan]
 
     new DDTracingContext[IO](tracer, span, "Mocked service", UUID.randomUUID().toString) {

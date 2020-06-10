@@ -1,6 +1,5 @@
 package com.colisweb.tracing.context.datadog
 
-import _root_.datadog.opentracing.DDTracer.DDTracerBuilder
 import _root_.datadog.opentracing._
 import _root_.datadog.trace.api.DDTags.SERVICE_NAME
 import _root_.datadog.trace.api.{GlobalTracer => DDGlobalTracer}
@@ -11,9 +10,11 @@ import com.colisweb.tracing.context.OpenTracingContext
 import com.colisweb.tracing.context.logging.TracingLogger
 import com.colisweb.tracing.core._
 import com.typesafe.scalalogging.StrictLogging
+import datadog.trace.core.DDSpan
 import io.opentracing.util.{GlobalTracer => OpenGlobalTracer}
 import net.logstash.logback.marker.Markers.appendEntries
 import org.slf4j.{Logger, Marker}
+
 import scala.jdk.CollectionConverters._
 
 /**
@@ -42,24 +43,23 @@ class DDTracingContext[F[_]: Sync](
   override def span(operationName: String, tags: Tags = Map.empty): TracingContextResource[F] =
     DDTracingContext.apply[F](tracer, serviceName, Some(span), correlationId)(operationName, tags)
 
-  override def addTags(tags: Tags): F[Unit] = Sync[F].delay {
-    tags.foreach {
-      case (key, value) => span.setTag(key, value)
+  override def addTags(tags: Tags): F[Unit] =
+    Sync[F].delay {
+      tags.foreach {
+        case (key, value) => span.setTag(key, value)
+      }
     }
-  }
 
   override def logger(implicit slf4jLogger: Logger): PureLogger[F] =
     TracingLogger.pureTracingLogger[F](slf4jLogger, markers)
 
   private lazy val markers: F[Marker] = {
 
-    val traceIdMarker = traceId
-      .map(id => Map("dd.trace_id" -> id))
-      .getOrElse(Map.empty)
+    val traceIdMarker = traceId.map(id => Map("dd.trace_id" -> id)).getOrElse(Map.empty)
     val spanIdMarker =
       spanId.map(id => Map("dd.span_id" -> id)).getOrElse(Map.empty)
     for {
-      spanId <- spanIdMarker
+      spanId  <- spanIdMarker
       traceId <- traceIdMarker
     } yield appendEntries(
       (traceId ++ spanId).asJava
@@ -93,13 +93,13 @@ object DDTracingContext extends StrictLogging {
       tags: Tags
   ): TracingContextResource[F] =
     OpenTracingContext
-      .spanResource(tracer, operationName, parentSpan)
+      .spanResource[F, DDTracer, DDSpan](tracer, operationName, parentSpan)
       .map(new DDTracingContext(tracer, _, serviceName, correlationId))
       .evalMap(ctx => ctx.addTags(tags + (SERVICE_NAME -> serviceName)).map(_ => ctx))
 
   private def buildAndRegisterDDTracer[F[_]: Sync]: F[DDTracer] =
     for {
-      tracer <- Sync[F].delay(new DDTracerBuilder().build())
+      tracer <- Sync[F].delay(DDTracer.builder().build())
       _ = OpenGlobalTracer.registerIfAbsent(tracer)
       _ = DDGlobalTracer.registerIfAbsent(tracer)
     } yield tracer
