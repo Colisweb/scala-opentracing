@@ -1,4 +1,4 @@
-package com.colisweb.tracing.context.datadog
+package com.colisweb.tracing.context
 
 import _root_.datadog.trace.api.DDTags.SERVICE_NAME
 import _root_.datadog.trace.api.{GlobalTracer => DDGlobalTracer}
@@ -95,19 +95,16 @@ object DDTracingContext extends StrictLogging {
       .map(new DDTracingContext(tracer, _, serviceName, correlationId))
       .evalMap(ctx => ctx.addTags(tags + (SERVICE_NAME -> serviceName)).map(_ => ctx))
 
-  private[tracing] def spanResource[F[_]: Sync](
+  private def spanResource[F[_]: Sync](
       tracer: DDTracer,
       operationName: String,
-      parentSpan: Option[Span] = None
+      parentSpan: Option[Span]
   ): Resource[F, Span] = {
     def acquire: F[Span] = {
-      val spanBuilder = {
-        val span = tracer.buildSpan(operationName)
-        val spanWithParent = parentSpan match {
-          case Some(s) => span.asChildOf(s)
-          case None    => span
-        }
-        spanWithParent
+      val span = tracer.buildSpan(operationName)
+      val spanBuilder = parentSpan match {
+        case Some(s) => span.asChildOf(s)
+        case None    => span
       }
       Sync[F].delay { spanBuilder.start() }
     }

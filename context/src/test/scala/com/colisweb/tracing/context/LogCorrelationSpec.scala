@@ -4,7 +4,6 @@ import java.util.UUID
 
 import cats.data._
 import cats.effect._
-import com.colisweb.tracing.context.datadog.DDTracingContext
 import com.colisweb.tracing.core.{Tags, TracingContext, TracingContextResource}
 import com.typesafe.scalalogging.StrictLogging
 import org.scalatest.funspec.AnyFunSpec
