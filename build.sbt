@@ -48,7 +48,27 @@ lazy val context = Project(id = "scala-opentracing-context", base = file("contex
       compilerPlugin(CompileTimeDependencies.kindProjector)
     )
   )
+/*
+lazy val contextDatadog = Project(id = "scala-opentracing-context-datadog", base = file("context-datadog"))
+  .dependsOn(core)
+  .settings(
+    crossScalaVersions := supportedScalaVersions,
+    libraryDependencies ++= Seq(
+      CompileTimeDependencies.cats,
+      CompileTimeDependencies.opentracingApi,
+      CompileTimeDependencies.opentracingUtil,
+      CompileTimeDependencies.opentracingDd,
+      CompileTimeDependencies.scalaCompat,
+      CompileTimeDependencies.scalaLogging,
+      CompileTimeDependencies.logstashLogbackEncoder,
+      TestsDependencies.scalatest,
+      TestsDependencies.logback,
+      compilerPlugin(CompileTimeDependencies.kindProjector)
+    )
+  )
 
+
+ */
 lazy val httpServer = Project(id = "scala-opentracing-http4s-server-tapir", base = file("http/server"))
   .dependsOn(context % "test->test;compile->compile")
   .settings(

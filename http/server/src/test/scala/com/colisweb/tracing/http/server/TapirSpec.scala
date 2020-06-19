@@ -6,6 +6,7 @@ import cats.data.OptionT
 import cats.effect.concurrent.Deferred
 import cats.effect.{ContextShift, IO, Resource}
 import com.colisweb.tracing.core._
+import com.colisweb.tracing.core.logger.PureLogger
 import org.http4s.Request
 import org.scalatest.funspec.AsyncFunSpec
 import org.scalatest.matchers.should.Matchers

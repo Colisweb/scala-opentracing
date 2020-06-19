@@ -2,6 +2,7 @@ package com.colisweb.tracing.context
 
 import cats.effect.{Resource, Sync}
 import com.colisweb.tracing.core._
+import com.colisweb.tracing.core.logger.PureLogger
 import org.slf4j.Logger
 
 /**

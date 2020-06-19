@@ -246,7 +246,7 @@ to your messages. A `PureLogger` is available in the `core` module. It wraps a l
 
 ```scala
 
-import com.colisweb.tracing.core.PureLogger
+import com.colisweb.tracing.core.logger.PureLogger
 import org.slf4j.{Logger, LoggerFactory}
 
 val logger: Logger = LoggerFactory.getLogger(getClass)

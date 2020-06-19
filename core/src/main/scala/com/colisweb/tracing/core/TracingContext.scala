@@ -1,5 +1,6 @@
 package com.colisweb.tracing.core
 
+import com.colisweb.tracing.core.logger.PureLogger
 import org.slf4j.Logger
 
 /**

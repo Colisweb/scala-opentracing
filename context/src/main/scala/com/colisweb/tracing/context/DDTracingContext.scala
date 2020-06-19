@@ -5,8 +5,8 @@ import _root_.datadog.trace.api.{GlobalTracer => DDGlobalTracer}
 import cats.data.OptionT
 import cats.effect._
 import cats.syntax.all._
-import com.colisweb.tracing.context.logging.TracingLogger
 import com.colisweb.tracing.core._
+import com.colisweb.tracing.core.logger.{PureLogger, TracingLogger}
 import com.typesafe.scalalogging.StrictLogging
 import datadog.opentracing.DDTracer
 import io.opentracing.Span

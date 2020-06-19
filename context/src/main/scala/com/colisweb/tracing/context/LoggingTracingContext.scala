@@ -5,6 +5,7 @@ import cats.effect._
 import cats.effect.concurrent.Ref
 import cats.syntax.all._
 import com.colisweb.tracing.core._
+import com.colisweb.tracing.core.logger.PureLogger
 import com.typesafe.scalalogging.StrictLogging
 import org.slf4j.Logger
 

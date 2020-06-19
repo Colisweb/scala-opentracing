@@ -1,4 +1,4 @@
-package com.colisweb.tracing.core
+package com.colisweb.tracing.core.logger
 
 import cats.effect.Sync
 import org.slf4j.Marker
