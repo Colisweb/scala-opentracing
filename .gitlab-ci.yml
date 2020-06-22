@@ -14,6 +14,9 @@ test scala-opentracing-core:
 test scala-opentracing-context:
   extends: .opentracing-test
 
+test scala-opentracing-context-datadog:
+  extends: .opentracing-test
+
 test scala-opentracing-http4s-server-tapir:
   extends: .opentracing-test
 
