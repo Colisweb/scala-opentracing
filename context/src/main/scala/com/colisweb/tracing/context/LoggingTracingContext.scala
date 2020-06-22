@@ -15,7 +15,7 @@ import scala.concurrent.duration.MILLISECONDS
   * A tracing context that will log the beginning and the end of all traces along with
   * their tags.
   * The traces will be emitted with a TRACE level, so make sure to configure your logging backend
-  * to ennable the TRACE level for com.colisweb.tracing
+  * to enable the TRACE level for com.colisweb.tracing
   */
 class LoggingTracingContext[F[_]: Sync: Timer](
     traceIdP: String,

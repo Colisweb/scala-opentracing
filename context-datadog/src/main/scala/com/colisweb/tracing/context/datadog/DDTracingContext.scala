@@ -1,4 +1,4 @@
-package com.colisweb.tracing.context
+package com.colisweb.tracing.context.datadog
 
 import _root_.datadog.trace.api.DDTags.SERVICE_NAME
 import _root_.datadog.trace.api.{GlobalTracer => DDGlobalTracer}
@@ -30,12 +30,14 @@ class DDTracingContext[F[_]: Sync](
 
   def traceId: OptionT[F, String] =
     OptionT.liftF(Sync[F] delay {
-      span.context().toTraceId
+      tracer.getTraceId
+      //span.context().toTraceId
     })
 
   def spanId: OptionT[F, String] =
     OptionT.liftF(Sync[F] delay {
-      span.context().toSpanId
+      tracer.getSpanId
+      //span.context().toSpanId
     })
 
   override def span(operationName: String, tags: Tags = Map.empty): TracingContextResource[F] =
@@ -59,6 +61,8 @@ class DDTracingContext[F[_]: Sync](
     for {
       spanId  <- spanIdMarker
       traceId <- traceIdMarker
+      _ = println(s"spanId in markers = $spanId")
+      _ = println(s"traceId in markers = $traceId")
     } yield appendEntries(
       (traceId ++ spanId).asJava
     )
@@ -100,7 +104,7 @@ object DDTracingContext extends StrictLogging {
       operationName: String,
       parentSpan: Option[Span]
   ): Resource[F, Span] = {
-    def acquire: F[Span] = {
+    val acquire: F[Span] = {
       val span = tracer.buildSpan(operationName)
       val spanBuilder = parentSpan match {
         case Some(s) => span.asChildOf(s)

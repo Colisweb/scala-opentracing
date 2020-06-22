@@ -14,7 +14,7 @@ ThisBuild / scalacOptions ++= crossScalacOptions(scalaVersion.value)
 
 resolvers += Resolver.sonatypeRepo("releases")
 
-lazy val root = (project in file(".")).settings(skip in publish := true).aggregate(core, context, httpServer, httpClient, httpTest, amqp)
+lazy val root = (project in file(".")).settings(skip in publish := true).aggregate(core, context, contextDatadog, httpServer, httpClient, httpTest, amqp)
 
 lazy val amqp = Project(id = "scala-opentracing-amqp", base = file("amqp")).settings(
   libraryDependencies ++= Seq(
@@ -39,7 +39,6 @@ lazy val context = Project(id = "scala-opentracing-context", base = file("contex
       CompileTimeDependencies.cats,
       CompileTimeDependencies.opentracingApi,
       CompileTimeDependencies.opentracingUtil,
-      CompileTimeDependencies.opentracingDd,
       CompileTimeDependencies.scalaCompat,
       CompileTimeDependencies.scalaLogging,
       CompileTimeDependencies.logstashLogbackEncoder,
@@ -48,7 +47,7 @@ lazy val context = Project(id = "scala-opentracing-context", base = file("contex
       compilerPlugin(CompileTimeDependencies.kindProjector)
     )
   )
-/*
+
 lazy val contextDatadog = Project(id = "scala-opentracing-context-datadog", base = file("context-datadog"))
   .dependsOn(core)
   .settings(
@@ -67,8 +66,6 @@ lazy val contextDatadog = Project(id = "scala-opentracing-context-datadog", base
     )
   )
 
-
- */
 lazy val httpServer = Project(id = "scala-opentracing-http4s-server-tapir", base = file("http/server"))
   .dependsOn(context % "test->test;compile->compile")
   .settings(

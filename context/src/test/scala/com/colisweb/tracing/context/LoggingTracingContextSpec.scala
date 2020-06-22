@@ -25,7 +25,7 @@ class LoggingTracingContextSpec extends AnyFunSpec with Matchers with StrictLogg
           val traceId: String = ctx.traceId.value.unsafeRunSync().get
           val spanId: String = ctx.spanId.value.unsafeRunSync().get
           stdOut should (
-            include(s"Trace ${traceId} Starting Span ${spanId} ($operationName)")
+            include(s"""Trace $traceId Starting Span $spanId ($operationName)""")
               and include(s"Finished Span ${spanId}")
           )
         }
