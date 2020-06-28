@@ -25,10 +25,7 @@ object TestServer {
       exCtx = ExecutionContext.global
       client <- BlazeClientBuilder[F](exCtx).resource
       service = new ServerService(client, server2Port)
-      server <- BlazeServerBuilder.apply(exCtx)
-        .bindLocal(serverPort)
-        .withHttpApp(service.routes(tracingContextBuilder))
-        .resource
+      server <- BlazeServerBuilder.apply(exCtx).bindLocal(serverPort).withHttpApp(service.routes(tracingContextBuilder)).resource
     } yield server
 
 }
@@ -49,9 +46,9 @@ final class ServerService[F[_]: Sync: ContextShift: Timer: ConcurrentEffect](
       .toTracedRoute[F] { (_, context) =>
         val server2GreetingsEndpoint: Uri =
           Uri.unsafeFromString(s"http://localhost:$server2Port/where_the_weed_at")
-        client.fetch(
-          Request[F](method = GET, uri = server2GreetingsEndpoint).withCorrelationId(context)
-        )(response => response.as[WrappedCorrelationId].map(Right(_)))
+        client
+          .run(Request[F](method = GET, uri = server2GreetingsEndpoint).withCorrelationId(context))
+          .use(response => response.as[WrappedCorrelationId].map(Right(_)))
       }
       .orNotFound
 
