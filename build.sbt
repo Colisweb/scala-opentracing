@@ -17,6 +17,7 @@ resolvers += Resolver.sonatypeRepo("releases")
 lazy val root = (project in file(".")).settings(skip in publish := true).aggregate(core, context, httpServer, httpClient, httpTest, amqp)
 
 lazy val amqp = Project(id = "scala-opentracing-amqp", base = file("amqp")).settings(
+  crossScalaVersions := supportedScalaVersions,
   libraryDependencies ++= Seq(
     CompileTimeDependencies.fs2Rabbit,
     TestsDependencies.scalatest
@@ -63,6 +64,7 @@ lazy val httpServer = Project(id = "scala-opentracing-http4s-server-tapir", base
 lazy val httpClient = Project(id = "scala-opentracing-http4s-client-blaze", base = file("http/client"))
   .dependsOn(context)
   .settings(
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= Seq(CompileTimeDependencies.http4s)
   )
 
