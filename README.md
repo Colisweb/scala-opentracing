@@ -13,7 +13,7 @@
 ```sbt
 ThisBuild / resolvers += Resolver.bintrayRepo("colisweb", "maven")
 
-val opentracingVersion = "2.2.0"
+val opentracingVersion = "2.4.1"
 
 val core = "com.colisweb" %% "scala-opentracing-core" % opentracingVersion
 val amqp = "com.colisweb" %% "scala-opentracing-amqp" % opentracingVersion 
@@ -49,7 +49,7 @@ resolvers += Resolver.bintrayRepo("colisweb", "maven")
 And add the core library to your dependencies :
 
 ```scala
-  libraryDependencies += "com.colisweb" %% "scala-opentracing-core" % "2.1.0"
+  libraryDependencies += "com.colisweb" %% "scala-opentracing-core" % "2.4.1"
 ```
 
 ## Usage
@@ -66,7 +66,7 @@ This library provides multiples instances of `TracingContext`:
 
 All of these contexts can be added to your project by adding the following import:
 ```scala
-  libraryDependencies += "com.colisweb" %% "scala-opentracing-context" % "2.1.0"
+  libraryDependencies += "com.colisweb" %% "scala-opentracing-context" % "2.4.1"
 ```
 
 If you use Datadog, create a `DDTracingContext`, otherwise use `OpenTracingContext`. Both will rely on some `Tracer`, provided by whatever tracing
@@ -185,7 +185,7 @@ tracing context with the `using` extractor from `com.colisweb.tracing.TracedHttp
 All of these functionnalities are present in the http package of the library.
 
 ```scala
-libraryDependencies += "com.colisweb" %% "scala-opentracing-http4s-server-tapir" % "2.1.0"
+libraryDependencies += "com.colisweb" %% "scala-opentracing-http4s-server-tapir" % "2.4.1"
 ```
 
 ```scala
