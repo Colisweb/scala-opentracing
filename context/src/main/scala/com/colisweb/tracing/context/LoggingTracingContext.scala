@@ -4,11 +4,14 @@ import cats.data.OptionT
 import cats.effect._
 import cats.effect.concurrent.Ref
 import cats.syntax.all._
+import com.colisweb.tracing.context.logging.TracingLogger
 import com.colisweb.tracing.core._
 import com.typesafe.scalalogging.StrictLogging
-import org.slf4j.Logger
+import net.logstash.logback.marker.Markers.appendEntries
+import org.slf4j.{Logger, Marker}
 
 import scala.concurrent.duration.MILLISECONDS
+import scala.jdk.CollectionConverters._
 
 /**
   * A tracing context that will log the beginning and the end of all traces along with
@@ -23,7 +26,7 @@ class LoggingTracingContext[F[_]: Sync: Timer](
     override val correlationId: String
 ) extends TracingContext[F] {
 
-  def spanId: OptionT[F, String] = OptionT.pure(spanIdP)
+  def spanId: OptionT[F, String]  = OptionT.pure(spanIdP)
   def traceId: OptionT[F, String] = OptionT.pure(traceIdP)
 
   def addTags(tags: Tags): F[Unit] = tagsRef.update(_ ++ tags)
@@ -34,7 +37,21 @@ class LoggingTracingContext[F[_]: Sync: Timer](
   ): TracingContextResource[F] =
     LoggingTracingContext(Some(this), correlationId = correlationId)(operationName)
 
-  override def logger(implicit slf4jLogger: Logger): PureLogger[F] = PureLogger[F](slf4jLogger)
+  override def logger(implicit slf4jLogger: Logger): PureLogger[F] =
+    TracingLogger.pureTracingLogger[F](slf4jLogger, markers)
+
+  private lazy val markers: F[Marker] = {
+
+    val traceIdMarker = traceId.map(id => Map("dd.trace_id" -> id)).getOrElse(Map.empty)
+    val spanIdMarker =
+      spanId.map(id => Map("dd.span_id" -> id)).getOrElse(Map.empty)
+    for {
+      spanId  <- spanIdMarker
+      traceId <- traceIdMarker
+      tags    <- tagsRef.get
+    } yield appendEntries((traceId ++ spanId ++ tags ++ Map("correlation_id" -> correlationId)).asJava)
+
+  }
 }
 
 object LoggingTracingContext extends StrictLogging {
@@ -52,8 +69,7 @@ object LoggingTracingContext extends StrictLogging {
       operationName: String,
       tags: Tags = Map.empty
   ): TracingContextResource[F] =
-    resource(parentContext, idGenerator, slf4jLogger, operationName, correlationId)
-      .evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
+    resource(parentContext, idGenerator, slf4jLogger, operationName, correlationId).evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
 
   private def resource[F[_]: Sync: Timer](
       parentContext: Option[LoggingTracingContext[F]],
@@ -62,17 +78,17 @@ object LoggingTracingContext extends StrictLogging {
       operationName: String,
       correlationId: String
   ): TracingContextResource[F] = {
-    val logger = PureLogger(slf4jLogger)
+    val logger                      = PureLogger(slf4jLogger)
     val idGeneratorValue: F[String] = idGenerator.getOrElse(randomUUIDGenerator)
     val traceIdF: F[String] =
       OptionT.fromOption(parentContext).flatMap(_.traceId).getOrElseF(idGeneratorValue)
 
     val acquire: F[SpanDetails[F]] = for {
       tagsRef <- Ref[F].of[Tags](Map.empty)
-      spanId <- idGeneratorValue
+      spanId  <- idGeneratorValue
       traceId <- traceIdF
-      start <- Clock[F].monotonic(MILLISECONDS)
-      ctx = new LoggingTracingContext[F](traceId, spanId, tagsRef, correlationId)
+      start   <- Clock[F].monotonic(MILLISECONDS)
+      ctx     = new LoggingTracingContext[F](traceId, spanId, tagsRef, correlationId)
       details = SpanDetails(start, traceId, spanId, ctx, tagsRef)
       _ <- logger.trace("Trace {} Starting Span {} ({})", traceId, spanId, operationName)
     } yield details
@@ -81,7 +97,7 @@ object LoggingTracingContext extends StrictLogging {
       case SpanDetails(start, traceId, spanId, _, tagsRef) =>
         for {
           tags <- tagsRef.get
-          end <- Clock[F].monotonic(MILLISECONDS)
+          end  <- Clock[F].monotonic(MILLISECONDS)
           duration = end - start
           _ <- logger.trace(
             "Trace {} Finished Span {} ({}) in {}ms. Tags: {}",
@@ -115,6 +131,5 @@ object LoggingTracingContext extends StrictLogging {
     */
   def builder[F[_]: Sync: Timer]: F[TracingContextBuilder[F]] =
     Sync[F].delay((operationName: String, tags: Tags, correlationId: String) =>
-      LoggingTracingContext.apply(correlationId = correlationId)(operationName, tags)
-    )
+      LoggingTracingContext.apply(correlationId = correlationId)(operationName, tags))
 }

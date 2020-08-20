@@ -4,6 +4,7 @@ import cats.data._
 import cats.effect._
 import com.colisweb.tracing.core.{TracingContext, TracingContextBuilder}
 import org.http4s._
+import org.slf4j.{Logger, LoggerFactory}
 import sttp.tapir.Endpoint
 import sttp.tapir.server.http4s._
 
@@ -13,21 +14,23 @@ trait TracedRoutes {
 
   implicit class TracedEndpoint[In, Err, Out](e: Endpoint[In, Err, Out, Nothing]) {
 
+    implicit val logger: Logger = LoggerFactory.getLogger("endpoint." + e.info.name.getOrElse(""))
+
     def toTracedRoute[F[_]: Sync](logic: (In, TracingContext[F]) => F[Either[Err, Out]])(
-        implicit builder: TracingContextBuilder[F],
+        implicit
+        builder: TracingContextBuilder[F],
         cs: ContextShift[F],
-        serverOptions: Http4sServerOptions[F]
-    ): HttpRoutes[F] = {
+        serverOptions: Http4sServerOptions[F]): HttpRoutes[F] = {
 
       TracedHttpRoutes.wrapHttpRoutes(
-        Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
+        LoggedHttpRoutes.wrapHttpRoutes(Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
           e.toRoutes(input => logic(input, req.tracingContext))(
               serverOptions,
               implicitly,
               cs
             )
             .run(req.request)
-        },
+        }),
         builder
       )
     }
@@ -36,14 +39,16 @@ trait TracedRoutes {
   implicit class TracedEndpointRecoverErrors[In, Err <: Throwable, Out](
       e: Endpoint[In, Err, Out, Nothing]
   ) {
+    implicit val logger: Logger = LoggerFactory.getLogger("endpoint." + e.info.name.getOrElse(""))
+
     def toTracedRouteRecoverErrors[F[_]: Sync](logic: (In, TracingContext[F]) => F[Out])(
-        implicit builder: TracingContextBuilder[F],
+        implicit
+        builder: TracingContextBuilder[F],
         eClassTag: ClassTag[Err],
         cs: ContextShift[F],
-        serverOptions: Http4sServerOptions[F]
-    ): HttpRoutes[F] =
+        serverOptions: Http4sServerOptions[F]): HttpRoutes[F] =
       TracedHttpRoutes.wrapHttpRoutes(
-        Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
+        LoggedHttpRoutes.wrapHttpRoutes(Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
           e.toRouteRecoverErrors(input => logic(input, req.tracingContext))(
               serverOptions,
               implicitly,
@@ -52,7 +57,7 @@ trait TracedRoutes {
               implicitly
             )
             .run(req.request)
-        },
+        }),
         builder
       )
   }

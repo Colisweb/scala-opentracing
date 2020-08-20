@@ -59,9 +59,7 @@ class DDTracingContext[F[_]: Sync](
     for {
       spanId  <- spanIdMarker
       traceId <- traceIdMarker
-    } yield appendEntries(
-      (traceId ++ spanId).asJava
-    )
+    } yield appendEntries((traceId ++ spanId ++ Map("correlation_id" -> correlationId)).asJava)
 
   }
 }
