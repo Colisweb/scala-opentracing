@@ -13,7 +13,7 @@
 ```sbt
 ThisBuild / resolvers += Resolver.bintrayRepo("colisweb", "maven")
 
-val opentracingVersion = "2.4.1"
+val opentracingVersion = "2.5.0"
 
 val core = "com.colisweb" %% "scala-opentracing-core" % opentracingVersion
 val amqp = "com.colisweb" %% "scala-opentracing-amqp" % opentracingVersion 
