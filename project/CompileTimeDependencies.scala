@@ -19,7 +19,7 @@ object Versions {
   final val scalatest       = "3.2.2"
   final val scalaCollection = "2.1.4"
   final val tapir           = "0.16.16"
-  final val wiremock        = "2.27.1"
+  final val wiremock        = "2.27.2"
 }
 
 object CompileTimeDependencies {
