@@ -23,8 +23,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
       (for {
         tracingContextDeferred <- Deferred[IO, TracingContext[IO]]
         _ <- myEndpoint
-          .toTracedRoute[IO]((_, ctx: TracingContext[IO]) =>
-            tracingContextDeferred.complete(ctx) *> IO.pure(Right("Ok")))
+          .toTracedRoute[IO]((_, ctx: TracingContext[IO]) => tracingContextDeferred.complete(ctx) *> IO.pure(Right("Ok")))
           .run(request)
           .value
         tracingContext <- tracingContextDeferred.get
@@ -50,8 +49,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
     it("Should serve an error when an exception is thrown from the endpoint logic") {
       val endpointWithError = myEndpoint.errorOut(plainBody[EndpointError](endpointErrorCodec))
       endpointWithError
-        .toTracedRouteRecoverErrors[IO]((_, _) =>
-          IO.raiseError(EndpointError("Something terrible happened")))
+        .toTracedRouteRecoverErrors[IO]((_, _) => IO.raiseError(EndpointError("Something terrible happened")))
         .run(request)
         .value
         .map(_.get)
@@ -64,9 +62,7 @@ class TapirSpec extends AsyncFunSpec with Matchers {
 }
 object TapirSpec {
   implicit def endpointErrorCodec: Codec[String, EndpointError, CodecFormat.TextPlain] =
-    string
-      .map(EndpointError)(error => s"Message: ${error.message}")
-      .schema(implicitly[Schema[EndpointError]])
+    string.map(EndpointError)(error => s"Message: ${error.message}").schema(implicitly[Schema[EndpointError]])
 
   implicit def mockedContextBuilder: TracingContextBuilder[IO] =
     (_, _, _) => Resource.pure[IO, TracingContext[IO]](mockedContext)
@@ -86,9 +82,9 @@ object TapirSpec {
 
   class MockedTracingContext extends TracingContext[IO] {
 
-    def spanId: OptionT[IO, String] = OptionT.pure(randomSpanId)
-    def traceId: OptionT[IO, String] = OptionT.pure(randomSpanId)
-    override def correlationId: String = UUID.randomUUID().toString
+    def spanId: OptionT[IO, String]                                   = OptionT.pure(randomSpanId)
+    def traceId: OptionT[IO, String]                                  = OptionT.pure(randomSpanId)
+    override def correlationId: String                                = UUID.randomUUID().toString
     override def logger(implicit slf4jLogger: Logger): PureLogger[IO] = PureLogger(slf4jLogger)
 
     def addTags(tags: Tags): cats.effect.IO[Unit] = IO.unit

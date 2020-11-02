@@ -10,8 +10,7 @@ import org.slf4j.Logger
 
 import scala.concurrent.duration.MILLISECONDS
 
-/**
-  * A tracing context that will log the beginning and the end of all traces along with
+/** A tracing context that will log the beginning and the end of all traces along with
   * their tags.
   * The traces will be emitted with a TRACE level, so make sure to configure your logging backend
   * to ennable the TRACE level for com.colisweb.tracing
@@ -23,7 +22,7 @@ class LoggingTracingContext[F[_]: Sync: Timer](
     override val correlationId: String
 ) extends TracingContext[F] {
 
-  def spanId: OptionT[F, String] = OptionT.pure(spanIdP)
+  def spanId: OptionT[F, String]  = OptionT.pure(spanIdP)
   def traceId: OptionT[F, String] = OptionT.pure(traceIdP)
 
   def addTags(tags: Tags): F[Unit] = tagsRef.update(_ ++ tags)
@@ -39,8 +38,7 @@ class LoggingTracingContext[F[_]: Sync: Timer](
 
 object LoggingTracingContext extends StrictLogging {
 
-  /**
-    * Returns a Resource[F, TracingContext[F]]. The first log will be emitted
+  /** Returns a Resource[F, TracingContext[F]]. The first log will be emitted
     * as the resource is acquired, the second log when it is released.
     */
   def apply[F[_]: Sync: Timer](
@@ -52,8 +50,7 @@ object LoggingTracingContext extends StrictLogging {
       operationName: String,
       tags: Tags = Map.empty
   ): TracingContextResource[F] =
-    resource(parentContext, idGenerator, slf4jLogger, operationName, correlationId)
-      .evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
+    resource(parentContext, idGenerator, slf4jLogger, operationName, correlationId).evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
 
   private def resource[F[_]: Sync: Timer](
       parentContext: Option[LoggingTracingContext[F]],
@@ -62,17 +59,17 @@ object LoggingTracingContext extends StrictLogging {
       operationName: String,
       correlationId: String
   ): TracingContextResource[F] = {
-    val logger = PureLogger(slf4jLogger)
+    val logger                      = PureLogger(slf4jLogger)
     val idGeneratorValue: F[String] = idGenerator.getOrElse(randomUUIDGenerator)
     val traceIdF: F[String] =
       OptionT.fromOption(parentContext).flatMap(_.traceId).getOrElseF(idGeneratorValue)
 
     val acquire: F[SpanDetails[F]] = for {
       tagsRef <- Ref[F].of[Tags](Map.empty)
-      spanId <- idGeneratorValue
+      spanId  <- idGeneratorValue
       traceId <- traceIdF
-      start <- Clock[F].monotonic(MILLISECONDS)
-      ctx = new LoggingTracingContext[F](traceId, spanId, tagsRef, correlationId)
+      start   <- Clock[F].monotonic(MILLISECONDS)
+      ctx     = new LoggingTracingContext[F](traceId, spanId, tagsRef, correlationId)
       details = SpanDetails(start, traceId, spanId, ctx, tagsRef)
       _ <- logger.trace("Trace {} Starting Span {} ({})", traceId, spanId, operationName)
     } yield details
@@ -81,7 +78,7 @@ object LoggingTracingContext extends StrictLogging {
       case SpanDetails(start, traceId, spanId, _, tagsRef) =>
         for {
           tags <- tagsRef.get
-          end <- Clock[F].monotonic(MILLISECONDS)
+          end  <- Clock[F].monotonic(MILLISECONDS)
           duration = end - start
           _ <- logger.trace(
             "Trace {} Finished Span {} ({}) in {}ms. Tags: {}",
@@ -107,8 +104,7 @@ object LoggingTracingContext extends StrictLogging {
       tagsRef: Ref[F, Tags]
   )
 
-  /**
-    * Returns a F[TracingContextBuilder[F]]
+  /** Returns a F[TracingContextBuilder[F]]
     *
     * This is provided for convenience and consistency with regards to the other
     * tracing contexts types.

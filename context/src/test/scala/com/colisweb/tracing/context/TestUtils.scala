@@ -24,7 +24,7 @@ object TestUtils {
   }
 
   def testStdOut(
-    body: IO[Unit],
-    assertion: String => Assertion
+      body: IO[Unit],
+      assertion: String => Assertion
   ) = testStdOut[Unit](body, (stdOut, _) => assertion(stdOut))
 }

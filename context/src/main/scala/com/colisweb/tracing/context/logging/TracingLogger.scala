@@ -7,8 +7,7 @@ import org.slf4j.{Logger, Marker}
 
 object TracingLogger {
 
-  /**
-    * A pure logger that will automatically log SpanId and TraceId from
+  /** A pure logger that will automatically log SpanId and TraceId from
     * a given TracingContext. The logging side effects will be lifted into
     * the tracing context's F monad.
     *

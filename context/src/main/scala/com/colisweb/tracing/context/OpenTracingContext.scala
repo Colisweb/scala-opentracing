@@ -8,8 +8,7 @@ import io.opentracing._
 import io.opentracing.util.GlobalTracer
 import org.slf4j.Logger
 
-/**
-  * This is meant to be used with any OpenTracing compatible tracer.
+/** This is meant to be used with any OpenTracing compatible tracer.
   * For usage with Datadog APM, use DDTracingContext instead
   */
 class OpenTracingContext[F[_]: Sync, T <: Tracer, S <: Span](
@@ -32,8 +31,8 @@ class OpenTracingContext[F[_]: Sync, T <: Tracer, S <: Span](
     )
 
   def addTags(tags: Tags): F[Unit] = Sync[F].delay {
-    tags.foreach {
-      case (key, value) => span.setTag(key, value)
+    tags.foreach { case (key, value) =>
+      span.setTag(key, value)
     }
   }
 
@@ -42,8 +41,7 @@ class OpenTracingContext[F[_]: Sync, T <: Tracer, S <: Span](
 
 object OpenTracingContext extends StrictLogging {
 
-  /**
-    * Creates a Resource[F, TracingContext[F]]. The underlying span will
+  /** Creates a Resource[F, TracingContext[F]]. The underlying span will
     * be automatically closed when the Resource is released.
     */
   def apply[F[_]: Sync, T <: Tracer, S <: Span](
@@ -58,18 +56,16 @@ object OpenTracingContext extends StrictLogging {
       .map(new OpenTracingContext(tracer, _, correlationId))
       .evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
 
-  /**
-    * Registers the tracer as the GlobalTracer and returns a F[TracingContextBuilder[F]].
+  /** Registers the tracer as the GlobalTracer and returns a F[TracingContextBuilder[F]].
     * This may be necessary depending on the concrete tracing system you use.
     */
   def builder[F[_]: Sync, T <: Tracer, S <: Span](tracer: T): F[TracingContextBuilder[F]] = {
     for {
       _ <- Sync[F].delay(GlobalTracer.registerIfAbsent(tracer))
-    } yield
-      new TracingContextBuilder[F] {
-        override def build(operationName: String, tags: Tags, correlationId: String): TracingContextResource[F] =
-          OpenTracingContext(tracer, correlationId = correlationId)(operationName, tags)
-      }
+    } yield new TracingContextBuilder[F] {
+      override def build(operationName: String, tags: Tags, correlationId: String): TracingContextResource[F] =
+        OpenTracingContext(tracer, correlationId = correlationId)(operationName, tags)
+    }
   }
 
   private[tracing] def spanResource[F[_]: Sync, T <: Tracer, S <: Span](

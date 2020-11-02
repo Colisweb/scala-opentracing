@@ -19,7 +19,7 @@ object TracedHttpRoutes {
   def enrichRequest[F[_]](request: Request[F]): EnrichedRequest[F] = {
     val idHeader = request.headers.get(CaseInsensitiveString(correlationIdHeaderName))
 
-    val correlationId = idHeader.fold(UUID.randomUUID.toString)(_.value)
+    val correlationId  = idHeader.fold(UUID.randomUUID.toString)(_.value)
     val enrichedHeader = Header(correlationIdHeaderName, correlationId)
 
     (request.putHeaders(enrichedHeader), correlationId)
@@ -27,8 +27,8 @@ object TracedHttpRoutes {
 
   def apply[F[_]: Sync](
       pf: PartialFunction[TracedRequest[F], F[Response[F]]]
-  )(
-      implicit builder: TracingContextBuilder[F]
+  )(implicit
+      builder: TracingContextBuilder[F]
   ): HttpRoutes[F] = {
     val tracedRoutes = Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
       pf.andThen(OptionT.liftF(_)).applyOrElse(req, Function.const(OptionT.none))
@@ -46,7 +46,7 @@ object TracedHttpRoutes {
       val operationName = "http4s-incoming-request"
       val tags = Map(
         HTTP_METHOD.getKey -> enrichedRequest.method.name,
-        HTTP_URL.getKey -> enrichedRequest.uri.path.toString
+        HTTP_URL.getKey    -> enrichedRequest.uri.path.toString
       )
 
       OptionT {
@@ -57,10 +57,7 @@ object TracedHttpRoutes {
               HTTP_STATUS.getKey -> response.status.code.toString
             ) ++
               response.headers.toList.map(h => (s"http.response.header.${h.name}" -> h.value)).toMap
-            context
-              .addTags(tags)
-              .map(_ => response)
-              .map(_.putHeaders(Header(correlationIdHeaderName, correlationId)))
+            context.addTags(tags).map(_ => response).map(_.putHeaders(Header(correlationIdHeaderName, correlationId)))
           }
           responseOptionWithTags.value
         }

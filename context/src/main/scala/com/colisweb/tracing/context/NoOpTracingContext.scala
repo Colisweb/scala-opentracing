@@ -4,8 +4,7 @@ import cats.effect.{Resource, Sync}
 import com.colisweb.tracing.core._
 import org.slf4j.Logger
 
-/**
-  * A tracing context that does nothing (no measurement, no log). This is useful
+/** A tracing context that does nothing (no measurement, no log). This is useful
   * as a mock implementation for your tests of if you need to disable tracing
   * conditionally
   */
@@ -23,8 +22,6 @@ object NoOpTracingContext {
   def apply[F[_]: Sync](correlationId: String) = new NoOpTracingContext[F](correlationId)
 
   def builder[F[_]: Sync](): F[TracingContextBuilder[F]] =
-    Sync[F].delay((_: String, _: Tags, correlationId: String) =>
-      Resource.pure(NoOpTracingContext(correlationId = correlationId))
-    )
+    Sync[F].delay((_: String, _: Tags, correlationId: String) => Resource.pure(NoOpTracingContext(correlationId = correlationId)))
 
 }

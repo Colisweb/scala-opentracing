@@ -29,7 +29,7 @@ class LogCorrelationSpec extends AnyFunSpec with StrictLogging with Matchers {
     }
 
     it("Should log span id as JSON field when TracingContext has a span id") {
-      val spanId = UUID.randomUUID().toString
+      val spanId  = UUID.randomUUID().toString
       val context = mockDDTracingContext(OptionT.pure(spanId), OptionT.none)
       testStdOut(
         context.logger.info("Hello"),
@@ -53,13 +53,13 @@ class LogCorrelationSpec extends AnyFunSpec with StrictLogging with Matchers {
       _traceId: OptionT[IO, String]
   ): TracingContext[IO] = {
     val tracer = DDTracer.builder().build()
-    val span = tracer.activeSpan()
+    val span   = tracer.activeSpan()
 
     new DDTracingContext[IO](tracer, span, "Mocked service", UUID.randomUUID().toString) {
       override def span(operationName: String, tags: Tags): TracingContextResource[IO] = ???
-      override def spanId: cats.data.OptionT[cats.effect.IO, String] = _spanId
-      override def traceId: cats.data.OptionT[cats.effect.IO, String] = _traceId
-      override def addTags(tags: Tags): cats.effect.IO[Unit] = ???
+      override def spanId: cats.data.OptionT[cats.effect.IO, String]                   = _spanId
+      override def traceId: cats.data.OptionT[cats.effect.IO, String]                  = _traceId
+      override def addTags(tags: Tags): cats.effect.IO[Unit]                           = ???
     }
   }
 }

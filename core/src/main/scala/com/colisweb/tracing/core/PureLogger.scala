@@ -3,8 +3,7 @@ package com.colisweb.tracing.core
 import cats.effect.Sync
 import org.slf4j.Marker
 
-/**
-  * A logger that wraps the side-effect of logging into
+/** A logger that wraps the side-effect of logging into
   * some algebraic effect F
   */
 trait PureLogger[F[_]] {

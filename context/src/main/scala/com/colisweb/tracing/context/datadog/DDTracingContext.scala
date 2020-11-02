@@ -15,8 +15,7 @@ import org.slf4j.{Logger, Marker}
 
 import scala.jdk.CollectionConverters._
 
-/**
-  * This tracing context is intended to be used with Datadog APM.
+/** This tracing context is intended to be used with Datadog APM.
   * It adds the Service Name tag to all spans, required to see the traces in the APM
   * view of Datadog.
   * It also provides access to span id and trace id to correlate logs and traces together.
@@ -43,8 +42,8 @@ class DDTracingContext[F[_]: Sync](
 
   override def addTags(tags: Tags): F[Unit] =
     Sync[F].delay {
-      tags.foreach {
-        case (key, value) => span.setTag(key, value)
+      tags.foreach { case (key, value) =>
+        span.setTag(key, value)
       }
     }
 

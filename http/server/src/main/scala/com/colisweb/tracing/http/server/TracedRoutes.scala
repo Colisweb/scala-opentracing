@@ -13,8 +13,8 @@ trait TracedRoutes {
 
   implicit class TracedEndpoint[In, Err, Out](e: Endpoint[In, Err, Out, Nothing]) {
 
-    def toTracedRoute[F[_]: Sync](logic: (In, TracingContext[F]) => F[Either[Err, Out]])(
-        implicit builder: TracingContextBuilder[F],
+    def toTracedRoute[F[_]: Sync](logic: (In, TracingContext[F]) => F[Either[Err, Out]])(implicit
+        builder: TracingContextBuilder[F],
         cs: ContextShift[F],
         serverOptions: Http4sServerOptions[F]
     ): HttpRoutes[F] = {
@@ -22,11 +22,10 @@ trait TracedRoutes {
       TracedHttpRoutes.wrapHttpRoutes(
         Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
           e.toRoutes(input => logic(input, req.tracingContext))(
-              serverOptions,
-              implicitly,
-              cs
-            )
-            .run(req.request)
+            serverOptions,
+            implicitly,
+            cs
+          ).run(req.request)
         },
         builder
       )
@@ -36,8 +35,8 @@ trait TracedRoutes {
   implicit class TracedEndpointRecoverErrors[In, Err <: Throwable, Out](
       e: Endpoint[In, Err, Out, Nothing]
   ) {
-    def toTracedRouteRecoverErrors[F[_]: Sync](logic: (In, TracingContext[F]) => F[Out])(
-        implicit builder: TracingContextBuilder[F],
+    def toTracedRouteRecoverErrors[F[_]: Sync](logic: (In, TracingContext[F]) => F[Out])(implicit
+        builder: TracingContextBuilder[F],
         eClassTag: ClassTag[Err],
         cs: ContextShift[F],
         serverOptions: Http4sServerOptions[F]
@@ -45,13 +44,12 @@ trait TracedRoutes {
       TracedHttpRoutes.wrapHttpRoutes(
         Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
           e.toRouteRecoverErrors(input => logic(input, req.tracingContext))(
-              serverOptions,
-              implicitly,
-              implicitly,
-              implicitly,
-              implicitly
-            )
-            .run(req.request)
+            serverOptions,
+            implicitly,
+            implicitly,
+            implicitly,
+            implicitly
+          ).run(req.request)
         },
         builder
       )

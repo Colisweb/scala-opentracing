@@ -25,10 +25,7 @@ final class CorrelationIdEndToEndTest extends AnyFlatSpec with Matchers with Bef
 
   lazy val (wireMockServer, wireMock) = {
     val wireMockConfiguration =
-      WireMockConfiguration
-        .options()
-        .port(server2Port)
-        .extensions(new ResponseTemplateTransformer(true))
+      WireMockConfiguration.options().port(server2Port).extensions(new ResponseTemplateTransformer(true))
     (new WireMockServer(wireMockConfiguration), new WireMock("localhost", server2Port))
   }
 
@@ -44,10 +41,7 @@ final class CorrelationIdEndToEndTest extends AnyFlatSpec with Matchers with Bef
           .withBody("""{ "correlationId": "{{request.headers.X-Correlation-Id}}" }""")
       )
     )
-    server1
-      .use(_ => IO.never)
-      .as(ExitCode.Success)
-      .unsafeRunAsyncAndForget()
+    server1.use(_ => IO.never).as(ExitCode.Success).unsafeRunAsyncAndForget()
   }
 
   override def afterAll(): Unit = {

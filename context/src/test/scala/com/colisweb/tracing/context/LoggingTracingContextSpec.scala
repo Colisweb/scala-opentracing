@@ -14,7 +14,7 @@ class LoggingTracingContextSpec extends AnyFunSpec with Matchers with StrictLogg
     it("Should log at the start and the end on the operation") {
 
       val operationName = "My Operation"
-      val context = LoggingTracingContext[IO](correlationId = "")(operationName)
+      val context       = LoggingTracingContext[IO](correlationId = "")(operationName)
       val operation: IO[LoggingTracingContext[IO]] = context use { ctx =>
         IO.sleep(100 millis).map(_ => ctx.asInstanceOf[LoggingTracingContext[IO]])
       }
@@ -23,7 +23,7 @@ class LoggingTracingContextSpec extends AnyFunSpec with Matchers with StrictLogg
         operation,
         (stdOut, ctx) => {
           val traceId: String = ctx.traceId.value.unsafeRunSync().get
-          val spanId: String = ctx.spanId.value.unsafeRunSync().get
+          val spanId: String  = ctx.spanId.value.unsafeRunSync().get
           stdOut should (
             include(s"Trace ${traceId} Starting Span ${spanId} ($operationName)")
               and include(s"Finished Span ${spanId}")
@@ -38,8 +38,7 @@ class LoggingTracingContextSpec extends AnyFunSpec with Matchers with StrictLogg
         parentCtx.span("Child context") use { child =>
           val childCtx = child.asInstanceOf[LoggingTracingContext[IO]]
           IO {
-            parentCtx.traceId.value.unsafeRunSync() shouldBe childCtx.traceId.value
-              .unsafeRunSync()
+            parentCtx.traceId.value.unsafeRunSync() shouldBe childCtx.traceId.value.unsafeRunSync()
             parentCtx.spanId.value.unsafeRunSync() shouldNot be(
               childCtx.spanId.value.unsafeRunSync()
             )

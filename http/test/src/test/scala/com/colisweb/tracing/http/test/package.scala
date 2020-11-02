@@ -19,14 +19,9 @@ package object test {
     circeCodec[WrappedCorrelationId]
 
   def greetEndpointDefinition: Endpoint[Unit, Unit, WrappedCorrelationId, Nothing] =
-    endpoint.get
-      .in("pass_the_weed")
-      .out(jsonBody[WrappedCorrelationId])
+    endpoint.get.in("pass_the_weed").out(jsonBody[WrappedCorrelationId])
 
   def freePort: Int =
-    Resource
-      .fromAutoCloseable(IO(new ServerSocket(0)))
-      .use(serverSocket => IO(serverSocket.getLocalPort))
-      .unsafeRunSync()
+    Resource.fromAutoCloseable(IO(new ServerSocket(0))).use(serverSocket => IO(serverSocket.getLocalPort)).unsafeRunSync()
 
 }

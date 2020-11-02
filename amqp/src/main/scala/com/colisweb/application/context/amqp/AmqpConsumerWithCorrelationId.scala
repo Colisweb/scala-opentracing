@@ -12,8 +12,8 @@ trait AmqpConsumerWithCorrelationId {
     def withCorrelationId: Stream[F, AmqpEnvelope[T]] = stream.map(enrichWithCorrelationId)
 
     private def enrichWithCorrelationId(envelope: AmqpEnvelope[T]): AmqpEnvelope[T] = {
-      val properties = envelope.properties
-      val correlationId = properties.correlationId.orElse(Some(UUID.randomUUID.toString))
+      val properties       = envelope.properties
+      val correlationId    = properties.correlationId.orElse(Some(UUID.randomUUID.toString))
       val propertiesWithId = properties.copy(correlationId = correlationId)
       envelope.copy(properties = propertiesWithId)
     }
