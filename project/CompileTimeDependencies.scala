@@ -10,7 +10,7 @@ object Versions {
   final val http4s          = "0.21.13"
   final val kindProjector   = "0.11.1"
   final val logback         = "1.2.3"
-  final val logstash        = "6.4"
+  final val logstash        = "6.5"
   final val log4cats        = "1.1.1"
   final val opentracing     = "0.33.0"
   final val requests        = "0.6.5"
