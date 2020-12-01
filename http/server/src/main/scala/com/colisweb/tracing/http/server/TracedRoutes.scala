@@ -20,7 +20,7 @@ trait TracedRoutes {
     ): HttpRoutes[F] = {
 
       TracedHttpRoutes.wrapHttpRoutes(
-        Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
+        Kleisli[OptionT[F, *], TracedRequest[F], Response[F]] { req =>
           e.toRoutes(input => logic(input, req.tracingContext))(
             serverOptions,
             implicitly,
@@ -42,7 +42,7 @@ trait TracedRoutes {
         serverOptions: Http4sServerOptions[F]
     ): HttpRoutes[F] =
       TracedHttpRoutes.wrapHttpRoutes(
-        Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
+        Kleisli[OptionT[F, *], TracedRequest[F], Response[F]] { req =>
           e.toRouteRecoverErrors(input => logic(input, req.tracingContext))(
             serverOptions,
             implicitly,

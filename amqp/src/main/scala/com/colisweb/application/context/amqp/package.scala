@@ -1,3 +1,3 @@
 package com.colisweb.application.context
 
-package object amqp extends AmqpConsumerWithCorrelationId
+package object amqp extends AmqpConsumerWithCorrelationIdHelper

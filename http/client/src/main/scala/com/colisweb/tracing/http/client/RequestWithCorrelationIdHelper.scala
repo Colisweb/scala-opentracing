@@ -5,7 +5,7 @@ import java.util.UUID
 import com.colisweb.tracing.core.TracingContext
 import org.http4s.{Header, Request}
 
-trait RequestWithCorrelationId {
+trait RequestWithCorrelationIdHelper {
 
   implicit final class RequestWithCorrelationId[F[_]](req: Request[F]) {
 

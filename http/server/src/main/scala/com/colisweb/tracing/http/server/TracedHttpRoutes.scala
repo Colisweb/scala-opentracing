@@ -30,17 +30,17 @@ object TracedHttpRoutes {
   )(implicit
       builder: TracingContextBuilder[F]
   ): HttpRoutes[F] = {
-    val tracedRoutes = Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]] { req =>
+    val tracedRoutes = Kleisli[OptionT[F, *], TracedRequest[F], Response[F]] { req =>
       pf.andThen(OptionT.liftF(_)).applyOrElse(req, Function.const(OptionT.none))
     }
     wrapHttpRoutes(tracedRoutes, builder)
   }
 
   def wrapHttpRoutes[F[_]: Sync](
-      routes: Kleisli[OptionT[F, ?], TracedRequest[F], Response[F]],
+      routes: Kleisli[OptionT[F, *], TracedRequest[F], Response[F]],
       builder: TracingContextBuilder[F]
   ): HttpRoutes[F] = {
-    Kleisli[OptionT[F, ?], Request[F], Response[F]] { req =>
+    Kleisli[OptionT[F, *], Request[F], Response[F]] { req =>
       val (enrichedRequest, correlationId) = enrichRequest(req)
 
       val operationName = "http4s-incoming-request"

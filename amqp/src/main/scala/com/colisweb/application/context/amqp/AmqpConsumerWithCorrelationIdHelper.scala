@@ -5,7 +5,7 @@ import java.util.UUID
 import dev.profunktor.fs2rabbit.model.AmqpEnvelope
 import fs2.Stream
 
-trait AmqpConsumerWithCorrelationId {
+trait AmqpConsumerWithCorrelationIdHelper {
 
   implicit final class AmqpConsumerWithCorrelationId[F[_], T](stream: Stream[F, AmqpEnvelope[T]]) {
 
