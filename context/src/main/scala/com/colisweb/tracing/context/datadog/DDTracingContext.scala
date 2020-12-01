@@ -9,7 +9,8 @@ import com.colisweb.tracing.context.logging.TracingLogger
 import com.colisweb.tracing.core._
 import com.typesafe.scalalogging.StrictLogging
 import datadog.opentracing.DDTracer
-import io.opentracing.Span
+import io.opentracing.util.GlobalTracer
+import io.opentracing.{Span, Tracer}
 import net.logstash.logback.marker.Markers.appendEntries
 import org.slf4j.{Logger, Marker}
 
@@ -20,12 +21,12 @@ import scala.jdk.CollectionConverters._
   * view of Datadog.
   * It also provides access to span id and trace id to correlate logs and traces together.
   */
-class DDTracingContext[F[_] : Sync](
-                                     protected val tracer: DDTracer,
-                                     protected val span: Span,
-                                     protected val serviceName: String,
-                                     override val correlationId: String
-                                   ) extends TracingContext[F] {
+class DDTracingContext[F[_]: Sync](
+    protected val tracer: Tracer,
+    protected val span: Span,
+    protected val serviceName: String,
+    override val correlationId: String
+) extends TracingContext[F] {
 
   def traceId: OptionT[F, String] =
     OptionT.liftF(Sync[F] delay {
@@ -56,7 +57,7 @@ class DDTracingContext[F[_] : Sync](
     val spanIdMarker =
       spanId.map(id => Map("dd.span_id" -> id)).getOrElse(Map.empty)
     for {
-      spanId <- spanIdMarker
+      spanId  <- spanIdMarker
       traceId <- traceIdMarker
     } yield appendEntries(
       (traceId ++ spanId).asJava
@@ -66,44 +67,45 @@ class DDTracingContext[F[_] : Sync](
 }
 
 object DDTracingContext extends StrictLogging {
-  def builder[F[_] : Sync](name: String): F[TracingContextBuilder[F]] = {
+  def builder[F[_]: Sync](name: String): F[TracingContextBuilder[F]] = {
     for {
       tracer <- buildAndRegisterDDTracer
-    } yield { (operationName: String, tags: Tags, correlationId: String) => {
-      DDTracingContext.apply(
-        tracer = tracer,
-        serviceName = name,
-        correlationId = correlationId
-      )(operationName, tags)
-    }
+    } yield { (operationName: String, tags: Tags, correlationId: String) =>
+      {
+        DDTracingContext.apply(
+          tracer = tracer,
+          serviceName = name,
+          correlationId = correlationId
+        )(operationName, tags)
+      }
     }
   }
 
-  def apply[F[_] : Sync](
-                          tracer: DDTracer,
-                          serviceName: String,
-                          parentSpan: Option[Span] = None,
-                          correlationId: String
-                        )(
-                          operationName: String,
-                          tags: Tags
-                        ): TracingContextResource[F] =
+  def apply[F[_]: Sync](
+      tracer: Tracer,
+      serviceName: String,
+      parentSpan: Option[Span] = None,
+      correlationId: String
+  )(
+      operationName: String,
+      tags: Tags
+  ): TracingContextResource[F] =
     DDTracingContext
       .spanResource[F](tracer, operationName, parentSpan)
       .map(new DDTracingContext(tracer, _, serviceName, correlationId))
       .evalMap(ctx => ctx.addTags(tags + (SERVICE_NAME -> serviceName)).map(_ => ctx))
 
-  private[tracing] def spanResource[F[_] : Sync](
-                                                  tracer: DDTracer,
-                                                  operationName: String,
-                                                  parentSpan: Option[Span] = None
-                                                ): Resource[F, Span] = {
+  private[tracing] def spanResource[F[_]: Sync](
+      tracer: Tracer,
+      operationName: String,
+      parentSpan: Option[Span] = None
+  ): Resource[F, Span] = {
     def acquire: F[Span] = {
       val spanBuilder = {
         val span = tracer.buildSpan(operationName)
         val spanWithParent = parentSpan match {
           case Some(s) => span.asChildOf(s)
-          case None => span
+          case None    => span
         }
         spanWithParent
       }
@@ -117,7 +119,14 @@ object DDTracingContext extends StrictLogging {
     Resource.make(acquire)(release)
   }
 
-  private def buildAndRegisterDDTracer[F[_] : Sync]: F[DDTracer] =
-    Sync[F].delay(DDGlobalTracer.get().asInstanceOf[DDTracer])
+  private def buildAndRegisterDDTracer[F[_]: Sync]: F[Tracer] = Sync[F].delay {
+    if (GlobalTracer.isRegistered) {
+      GlobalTracer.get()
+    } else {
+      val tracer = DDTracer.builder().build()
+      DDGlobalTracer.registerIfAbsent(tracer)
+      tracer
+    }
+  }
 
 }
