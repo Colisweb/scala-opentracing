@@ -9,6 +9,7 @@ import org.http4s.circe._
 import sttp.tapir.Codec.JsonCodec
 import sttp.tapir._
 import sttp.tapir.json.circe._
+import sttp.tapir.generic.auto._
 
 package object test {
 
@@ -18,7 +19,7 @@ package object test {
   implicit val responseWithCorrelationIdCodec: JsonCodec[WrappedCorrelationId] =
     circeCodec[WrappedCorrelationId]
 
-  def greetEndpointDefinition: Endpoint[Unit, Unit, WrappedCorrelationId, Nothing] =
+  def greetEndpointDefinition: Endpoint[Unit, Unit, WrappedCorrelationId, Any] =
     endpoint.get.in("pass_the_weed").out(jsonBody[WrappedCorrelationId])
 
   def freePort: Int =

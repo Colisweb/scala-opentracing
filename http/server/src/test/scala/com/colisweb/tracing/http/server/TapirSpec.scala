@@ -4,7 +4,7 @@ import java.util.UUID
 
 import cats.data.OptionT
 import cats.effect.concurrent.Deferred
-import cats.effect.{ContextShift, IO, Resource}
+import cats.effect.{ContextShift, IO, Resource, Timer}
 import com.colisweb.tracing.core._
 import org.http4s.Request
 import org.scalatest.funspec.AsyncFunSpec
@@ -12,10 +12,12 @@ import org.scalatest.matchers.should.Matchers
 import org.slf4j.Logger
 import sttp.tapir.Codec.string
 import sttp.tapir._
+import sttp.tapir.generic.auto._
 
 import scala.concurrent.ExecutionContext
 
 class TapirSpec extends AsyncFunSpec with Matchers {
+  implicit val timer : Timer[IO] = IO.timer(ExecutionContext.global)
   import TapirSpec._
 
   describe("Tapir Integration") {
@@ -71,7 +73,7 @@ object TapirSpec {
 
   case class EndpointError(message: String) extends RuntimeException
 
-  val myEndpoint: Endpoint[Unit, Unit, String, Nothing] =
+  val myEndpoint: Endpoint[Unit, Unit, String, Any] =
     endpoint.get.in("").name("My endpoint").out(stringBody)
 
   val request: Request[IO] = Request[IO]()

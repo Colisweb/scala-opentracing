@@ -5,15 +5,16 @@ import cats.effect._
 import com.colisweb.tracing.core.{TracingContext, TracingContextBuilder}
 import org.http4s._
 import sttp.tapir.Endpoint
+import sttp.tapir.server.http4s.Http4sServerInterpreter.{toRouteRecoverErrors, toRoutes}
 import sttp.tapir.server.http4s._
 
 import scala.reflect.ClassTag
 
 trait TracedRoutes {
 
-  implicit class TracedEndpoint[In, Err, Out](e: Endpoint[In, Err, Out, Nothing]) {
+  implicit class TracedEndpoint[In, Err, Out](e: Endpoint[In, Err, Out, Any]) {
 
-    def toTracedRoute[F[_]: Sync](logic: (In, TracingContext[F]) => F[Either[Err, Out]])(implicit
+    def toTracedRoute[F[_]: Sync: Concurrent: Timer](logic: (In, TracingContext[F]) => F[Either[Err, Out]])(implicit
         builder: TracingContextBuilder[F],
         cs: ContextShift[F],
         serverOptions: Http4sServerOptions[F]
@@ -21,10 +22,11 @@ trait TracedRoutes {
 
       TracedHttpRoutes.wrapHttpRoutes(
         Kleisli[OptionT[F, *], TracedRequest[F], Response[F]] { req =>
-          e.toRoutes(input => logic(input, req.tracingContext))(
+          toRoutes(e)(input => logic(input, req.tracingContext))(
             serverOptions,
             implicitly,
-            cs
+            cs,
+            implicitly
           ).run(req.request)
         },
         builder
@@ -33,9 +35,9 @@ trait TracedRoutes {
   }
 
   implicit class TracedEndpointRecoverErrors[In, Err <: Throwable, Out](
-      e: Endpoint[In, Err, Out, Nothing]
+      e: Endpoint[In, Err, Out, Any]
   ) {
-    def toTracedRouteRecoverErrors[F[_]: Sync](logic: (In, TracingContext[F]) => F[Out])(implicit
+    def toTracedRouteRecoverErrors[F[_]: Sync: Concurrent: Timer](logic: (In, TracingContext[F]) => F[Out])(implicit
         builder: TracingContextBuilder[F],
         eClassTag: ClassTag[Err],
         cs: ContextShift[F],
@@ -43,8 +45,9 @@ trait TracedRoutes {
     ): HttpRoutes[F] =
       TracedHttpRoutes.wrapHttpRoutes(
         Kleisli[OptionT[F, *], TracedRequest[F], Response[F]] { req =>
-          e.toRouteRecoverErrors(input => logic(input, req.tracingContext))(
+          toRouteRecoverErrors(e)(input => logic(input, req.tracingContext))(
             serverOptions,
+            implicitly,
             implicitly,
             implicitly,
             implicitly,
