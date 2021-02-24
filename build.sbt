@@ -14,7 +14,7 @@ ThisBuild / scalacOptions ++= crossScalacOptions(scalaVersion.value)
 
 resolvers += Resolver.sonatypeRepo("releases")
 
-lazy val root = (project in file(".")).settings(skip in publish := true).aggregate(core, context, httpServer, httpClient, httpTest, amqp)
+lazy val root = (project in file(".")).settings(skip in publish := true).aggregate(core, context, httpServer, httpClient, httpTest, amqp, catsInstrumented)
 
 lazy val amqp = Project(id = "scala-opentracing-amqp", base = file("amqp")).settings(
   crossScalaVersions := supportedScalaVersions,
@@ -82,4 +82,13 @@ lazy val httpTest = Project(id = "scala-opentracing-http4s-test", base = file("h
       TestsDependencies.http4sBlazeClient
     ),
     skip in publish := true
+  )
+
+lazy val catsInstrumented = Project(id = "scala-opentracing-cats-instrumented", base = file("cats-instrumented"))
+  .settings(
+    crossScalaVersions := supportedScalaVersions,
+    libraryDependencies ++= Seq(
+      CompileTimeDependencies.catsEffect,
+      CompileTimeDependencies.opentracingUtil
+    )
   )
