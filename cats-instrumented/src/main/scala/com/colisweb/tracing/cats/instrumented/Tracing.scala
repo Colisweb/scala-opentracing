@@ -9,18 +9,17 @@ trait Tracing[F[_]] {
 
   private val tracer: Tracer = GlobalTracer.get()
 
-  protected def span[A](name: String)(computation: => F[A])(implicit F: Bracket[F, Throwable]): F[A] =
-    span(name, identity[SpanBuilder](_))(computation)
+  protected def span[A](name: String, serviceName: String, isRoot: Boolean = false, customize: SpanBuilder => SpanBuilder = identity[SpanBuilder](_))(computation: => F[A])(implicit F: Bracket[F, Throwable]): F[A] =
+    span(name, isRoot, builder => customize(builder.withTag("service", serviceName)))(computation)
 
-  protected def span[A](name: String, serviceName: String)(computation: => F[A])(implicit F: Bracket[F, Throwable]): F[A] =
-    span(name, _.withTag("service", serviceName))(computation)
+  protected def span[A](name: String, isRoot: Boolean = false, customize: SpanBuilder => SpanBuilder = identity[SpanBuilder](_))(computation: => F[A])(implicit F: Bracket[F, Throwable]): F[A] =
+    makeSpan(name, if (isRoot) customize.compose(_.ignoreActiveSpan()) else customize)(computation)
 
-  protected def span[A](name: String, serviceName: String, customize: SpanBuilder => SpanBuilder)(computation: => F[A])(implicit F: Bracket[F, Throwable]): F[A] =
-    span(name, builder => customize(builder.withTag("service", serviceName)))(computation)
-
-  protected def span[A](name: String, customize: SpanBuilder => SpanBuilder)(computation: => F[A])(implicit F: Bracket[F, Throwable]): F[A] = {
+  private def makeSpan[A](name: String, customize: SpanBuilder => SpanBuilder)(computation: => F[A])(implicit F: Bracket[F, Throwable]): F[A] = {
     F.bracketCase(
-      F.catchNonFatal(customize(tracer.buildSpan(name)).start())
+      F.catchNonFatal(
+        customize(tracer.buildSpan(name)).start()
+      )
     ) { currentSpan =>
       tracer.scopeManager().activate(currentSpan)
       computation
