@@ -17,7 +17,7 @@ import sttp.tapir.generic.auto._
 import scala.concurrent.ExecutionContext
 
 class TapirSpec extends AsyncFunSpec with Matchers {
-  implicit val timer : Timer[IO] = IO.timer(ExecutionContext.global)
+  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
   import TapirSpec._
 
   describe("Tapir Integration") {
