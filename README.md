@@ -2,25 +2,8 @@
 
 # Get Scala Opentracing
 
-## Download from bintray
-[Download opentracing core](https://bintray.com/colisweb/maven/scala-opentracing-core/_latestVersion)  
-[Download opentracing context](https://bintray.com/colisweb/maven/scala-opentracing-context/_latestVersion)  
-[Download opentracing http server](https://bintray.com/colisweb/maven/scala-opentracing-http4s-server-tapir/_latestVersion)  
-[Download opentracing http client](https://bintray.com/colisweb/maven/scala-opentracing-http4s-client-blaze/_latestVersion)  
-[Download opentracing amqp](https://bintray.com/colisweb/maven/scala-opentracing-amqp/_latestVersion)
-
-## Download using sbt
-```sbt
-ThisBuild / resolvers += Resolver.bintrayRepo("colisweb", "maven")
-
-val opentracingVersion = "2.5.0"
-
-val core = "com.colisweb" %% "scala-opentracing-core" % opentracingVersion
-val amqp = "com.colisweb" %% "scala-opentracing-amqp" % opentracingVersion 
-val context = "com.colisweb" %% "scala-opentracing-context" % opentracingVersion
-val server = "com.colisweb" %% "scala-opentracing-http4s-server-tapir" %  opentracingVersion
-val client ="com.colisweb" %% "scala-opentracing-http4s-client-blaze" % opentracingVersion
-```
+## Download from maven
+[Scala-opentracing](https://repo1.maven.org/maven2/com/colisweb/)
 
 # Scala Opentracing
 
@@ -39,12 +22,6 @@ are automatically closed by a `Resource` from Cats effect for safety and conveni
 - **Be idiomatic** : we try to follow the principles of functional programming in Scala, and wrap all side-effects of the Java libraries into algebraic effects.
 
 ## Installation
-
-Add our Bintray repository to your resolvers :
-
-```scala
-resolvers += Resolver.bintrayRepo("colisweb", "maven")
-```
 
 And add the core library to your dependencies :
 

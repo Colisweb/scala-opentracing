@@ -1,0 +1,4 @@
+[submodule "scala-common"]
+	path = scala-common
+	url = ../scala-common.git
+	branch = v1.6.2

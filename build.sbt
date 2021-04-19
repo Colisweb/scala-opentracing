@@ -5,13 +5,11 @@ lazy val scala212               = "2.12.10"
 lazy val supportedScalaVersions = List(scala213, scala212)
 
 ThisBuild / scalaVersion := scala213
-ThisBuild / organization := "com.colisweb"
-ThisBuild / organizationName := "colisweb"
-ThisBuild / bintrayOrganization := Some("colisweb")
-ThisBuild / licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 ThisBuild / parallelExecution := false
 ThisBuild / scalacOptions ++= crossScalacOptions(scalaVersion.value)
-
+ThisBuild / pushRemoteCacheTo := Some(
+  MavenCache("local-cache", baseDirectory.value / sys.env.getOrElse("CACHE_PATH", "sbt-cache"))
+)
 resolvers += Resolver.sonatypeRepo("releases")
 
 lazy val root = (project in file(".")).settings(skip in publish := true).aggregate(core, context, httpServer, httpClient, httpTest, amqp)
