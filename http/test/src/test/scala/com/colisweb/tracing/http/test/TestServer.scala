@@ -21,7 +21,7 @@ object TestServer {
       server2Port: Int
   ): Resource[F, Server[F]] =
     for {
-      tracingContextBuilder <- Resource.liftF(NoOpTracingContext.builder())
+      tracingContextBuilder <- Resource.eval(NoOpTracingContext.builder())
       exCtx = ExecutionContext.global
       client <- BlazeClientBuilder[F](exCtx).resource
       service = new ServerService(client, server2Port)
