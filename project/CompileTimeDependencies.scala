@@ -11,7 +11,7 @@ object Versions {
   final val kindProjector   = "0.11.3"
   final val logback         = "1.2.3"
   final val logstash        = "6.6"
-  final val log4cats        = "1.1.1"
+  final val log4cats        = "1.2.0"
   final val opentracing     = "0.33.0"
   final val requests        = "0.6.8"
   final val scalaCompat     = "2.4.2"
@@ -29,7 +29,7 @@ object CompileTimeDependencies {
   final val http4s                 = "org.http4s"                  %% "http4s-core"              % Versions.http4s
   final val kindProjector          = "org.typelevel"               %% "kind-projector"           % Versions.kindProjector cross CrossVersion.full
   final val logstashLogbackEncoder = "net.logstash.logback"         % "logstash-logback-encoder" % Versions.logstash
-  final val log4catsSlf4j          = "io.chrisdavenport"           %% "log4cats-slf4j"           % Versions.log4cats
+  final val log4catsSlf4j          = "org.typelevel"           %% "log4cats-slf4j"           % Versions.log4cats
   final val opentracingApi         = "io.opentracing"               % "opentracing-api"          % Versions.opentracing
   final val opentracingDd          = "com.datadoghq"                % "dd-trace-ot"              % Versions.datadog
   final val opentracingUtil        = "io.opentracing"               % "opentracing-util"         % Versions.opentracing
