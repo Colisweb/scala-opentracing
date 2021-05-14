@@ -16,7 +16,7 @@ object Versions {
   final val requests        = "0.6.8"
   final val scalaCompat     = "2.4.2"
   final val scalaLogging    = "3.9.3"
-  final val scalatest       = "3.2.8"
+  final val scalatest       = "3.2.9"
   final val scalaCollection = "2.1.4"
   final val tapir           = "0.17.19"
   final val wiremock        = "2.27.2"
