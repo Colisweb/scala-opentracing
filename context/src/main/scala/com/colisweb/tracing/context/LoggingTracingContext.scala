@@ -2,20 +2,20 @@ package com.colisweb.tracing.context
 
 import cats.data.OptionT
 import cats.effect._
-import cats.effect.concurrent.Ref
 import cats.syntax.all._
 import com.colisweb.tracing.core._
 import com.typesafe.scalalogging.StrictLogging
 import org.slf4j.Logger
 
 import scala.concurrent.duration.MILLISECONDS
+import cats.effect.{ Ref, Temporal }
 
 /** A tracing context that will log the beginning and the end of all traces along with
   * their tags.
   * The traces will be emitted with a TRACE level, so make sure to configure your logging backend
   * to ennable the TRACE level for com.colisweb.tracing
   */
-class LoggingTracingContext[F[_]: Sync: Timer](
+class LoggingTracingContext[F[_]: Sync: Temporal](
     traceIdP: String,
     spanIdP: String,
     tagsRef: Ref[F, Tags],
@@ -41,7 +41,7 @@ object LoggingTracingContext extends StrictLogging {
   /** Returns a Resource[F, TracingContext[F]]. The first log will be emitted
     * as the resource is acquired, the second log when it is released.
     */
-  def apply[F[_]: Sync: Timer](
+  def apply[F[_]: Sync: Temporal](
       parentContext: Option[LoggingTracingContext[F]] = None,
       idGenerator: Option[F[String]] = None,
       slf4jLogger: org.slf4j.Logger = logger.underlying,
@@ -52,7 +52,7 @@ object LoggingTracingContext extends StrictLogging {
   ): TracingContextResource[F] =
     resource(parentContext, idGenerator, slf4jLogger, operationName, correlationId).evalMap(ctx => ctx.addTags(tags).map(_ => ctx))
 
-  private def resource[F[_]: Sync: Timer](
+  private def resource[F[_]: Sync: Temporal](
       parentContext: Option[LoggingTracingContext[F]],
       idGenerator: Option[F[String]],
       slf4jLogger: org.slf4j.Logger,
@@ -109,7 +109,7 @@ object LoggingTracingContext extends StrictLogging {
     * This is provided for convenience and consistency with regards to the other
     * tracing contexts types.
     */
-  def builder[F[_]: Sync: Timer]: F[TracingContextBuilder[F]] =
+  def builder[F[_]: Sync: Temporal]: F[TracingContextBuilder[F]] =
     Sync[F].delay((operationName: String, tags: Tags, correlationId: String) =>
       LoggingTracingContext.apply(correlationId = correlationId)(operationName, tags)
     )

@@ -1,6 +1,6 @@
 package com.colisweb.tracing.http.server
 
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.IO
 import com.colisweb.tracing.context.NoOpTracingContext
 import com.colisweb.tracing.core.{TracingContext, TracingContextBuilder}
 import com.colisweb.tracing.http.server.TracedHttpRoutes._
@@ -11,11 +11,12 @@ import org.scalatest.matchers.should.Matchers
 import sttp.tapir.endpoint
 
 import scala.concurrent.ExecutionContext
+import cats.effect.Temporal
 
 final class TracedEndpointSpec extends AnyFlatSpec with Matchers {
 
   implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-  implicit val timer: Timer[IO]               = IO.timer(ExecutionContext.global)
+  implicit val timer: Temporal[IO]               = IO.timer(ExecutionContext.global)
   implicit val tcb: TracingContextBuilder[IO] = NoOpTracingContext.builder[IO]().unsafeRunSync()
 
   def dumbLogic: (Unit, TracingContext[IO]) => IO[Either[Unit, Unit]] = (_, _) => IO(Right(()))

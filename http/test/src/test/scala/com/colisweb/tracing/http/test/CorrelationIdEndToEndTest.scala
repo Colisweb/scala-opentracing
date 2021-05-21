@@ -1,6 +1,6 @@
 package com.colisweb.tracing.http.test
 
-import cats.effect.{ContextShift, ExitCode, IO, Resource, Timer}
+import cats.effect.{ExitCode, IO, Resource}
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -14,12 +14,13 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
+import cats.effect.Temporal
 
 final class CorrelationIdEndToEndTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
 
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global
   implicit val cs: ContextShift[IO]         = IO.contextShift(ec)
-  implicit val timer: Timer[IO]             = IO.timer(ec)
+  implicit val timer: Temporal[IO]             = IO.timer(ec)
 
   val (server1Port, server2Port) = (freePort, freePort)
 
