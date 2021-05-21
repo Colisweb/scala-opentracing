@@ -3,8 +3,7 @@ package com.colisweb.tracing.http.server
 import java.util.UUID
 
 import cats.data.OptionT
-import cats.effect.concurrent.Deferred
-import cats.effect.{ContextShift, IO, Resource, Timer}
+import cats.effect.{IO, Resource}
 import com.colisweb.tracing.core._
 import org.http4s.Request
 import org.scalatest.funspec.AsyncFunSpec
@@ -15,9 +14,10 @@ import sttp.tapir._
 import sttp.tapir.generic.auto._
 
 import scala.concurrent.ExecutionContext
+import cats.effect.{ Deferred, Temporal }
 
 class TapirSpec extends AsyncFunSpec with Matchers {
-  implicit val timer : Timer[IO] = IO.timer(ExecutionContext.global)
+  implicit val timer : Temporal[IO] = IO.timer(ExecutionContext.global)
   import TapirSpec._
 
   describe("Tapir Integration") {

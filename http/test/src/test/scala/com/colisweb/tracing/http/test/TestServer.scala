@@ -1,7 +1,7 @@
 package com.colisweb.tracing.http.test
 
 import cats.Applicative
-import cats.effect.{ConcurrentEffect, ContextShift, Resource, Sync, Timer}
+import cats.effect.{ConcurrentEffect, Resource, Sync}
 import cats.implicits._
 import com.colisweb.tracing.context.NoOpTracingContext
 import com.colisweb.tracing.core.TracingContextBuilder
@@ -13,10 +13,11 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.{HttpApp, Request, Uri}
 
 import scala.concurrent.ExecutionContext
+import cats.effect.Temporal
 
 object TestServer {
 
-  def create[F[_]: ConcurrentEffect: Timer: ContextShift](
+  def create[F[_]: ConcurrentEffect: Temporal: ContextShift](
       serverPort: Int,
       server2Port: Int
   ): Resource[F, Server[F]] =
@@ -30,7 +31,7 @@ object TestServer {
 
 }
 
-final class ServerService[F[_]: Sync: ContextShift: Timer: ConcurrentEffect](
+final class ServerService[F[_]: Sync: ContextShift: Temporal: ConcurrentEffect](
     client: Client[F],
     server2Port: Int
 ) {
