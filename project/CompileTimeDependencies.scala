@@ -6,7 +6,7 @@ object Versions {
   final val catsEffect      = "2.5.1"
   final val circe           = "0.14.1"
   final val datadog         = "0.68.0"
-  final val fs2             = "4.0.0"
+  final val fs2             = "4.1.0"
   final val http4s          = "0.21.24"
   final val kindProjector   = "0.13.0"
   final val logback         = "1.2.3"
