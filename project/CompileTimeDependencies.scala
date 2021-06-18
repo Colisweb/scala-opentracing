@@ -15,7 +15,7 @@ object Versions {
   final val opentracing     = "0.33.0"
   final val requests        = "0.6.9"
   final val scalaCompat     = "2.4.4"
-  final val scalaLogging    = "3.9.3"
+  final val scalaLogging    = "3.9.4"
   final val scalatest       = "3.2.9"
   final val scalaCollection = "2.1.4"
   final val tapir           = "0.17.19"
