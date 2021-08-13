@@ -9,14 +9,14 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter.{toRouteRecoverErrors, t
 import sttp.tapir.server.http4s._
 
 import scala.reflect.ClassTag
+import cats.effect.Temporal
 
 trait TracedRoutes {
 
   implicit class TracedEndpoint[In, Err, Out](e: Endpoint[In, Err, Out, Any]) {
 
-    def toTracedRoute[F[_]: Sync: Concurrent: Timer](logic: (In, TracingContext[F]) => F[Either[Err, Out]])(implicit
+    def toTracedRoute[F[_]: Sync: Concurrent: Temporal](logic: (In, TracingContext[F]) => F[Either[Err, Out]])(implicit
         builder: TracingContextBuilder[F],
-        cs: ContextShift[F],
         serverOptions: Http4sServerOptions[F]
     ): HttpRoutes[F] = {
 
@@ -37,10 +37,9 @@ trait TracedRoutes {
   implicit class TracedEndpointRecoverErrors[In, Err <: Throwable, Out](
       e: Endpoint[In, Err, Out, Any]
   ) {
-    def toTracedRouteRecoverErrors[F[_]: Sync: Concurrent: Timer](logic: (In, TracingContext[F]) => F[Out])(implicit
+    def toTracedRouteRecoverErrors[F[_]: Sync: Concurrent: Temporal](logic: (In, TracingContext[F]) => F[Out])(implicit
         builder: TracingContextBuilder[F],
         eClassTag: ClassTag[Err],
-        cs: ContextShift[F],
         serverOptions: Http4sServerOptions[F]
     ): HttpRoutes[F] =
       TracedHttpRoutes.wrapHttpRoutes(

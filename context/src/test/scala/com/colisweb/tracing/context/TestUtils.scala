@@ -6,9 +6,10 @@ import org.scalatest._
 import cats.effect._
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
+import cats.effect.Temporal
 
 object TestUtils {
-  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+  implicit val timer: Temporal[IO] = IO.timer(ExecutionContext.global)
 
   def testStdOut[A](
       body: IO[A],
